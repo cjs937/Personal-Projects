@@ -7,6 +7,7 @@ public class BaseNode : ScriptableObject
     public BaseNode prevNode;
     public BaseNode nextNode;
     public Rect windowRect;
+    public GUIStyle style;
     public bool hasInputs = false;
 
     public string windowTitle = "";

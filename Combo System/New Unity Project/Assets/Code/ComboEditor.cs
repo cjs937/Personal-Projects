@@ -11,23 +11,32 @@ public class ComboEditor : EditorWindow
     BaseNode selectedNode;
     bool makeTransitionMode = false;
 
+    //opens combo editor window
     [MenuItem("Window/Combo Editor")]
     static void ShowEditor()
     {
         ComboEditor editor = GetWindow<ComboEditor>();
+        editor.titleContent = new GUIContent("Combo Editor");
     }
 
     private void OnGUI()
     {
-        Event evt = Event.current;
+        HandleEvents(Event.current);
+
+        Draw();
+    }
+
+    void HandleEvents(Event _evt)
+    {
+        Event evt = _evt;
 
         mousePos = evt.mousePosition;
-        
-        if(evt.button == 1 && !makeTransitionMode) // right click in editor window
+
+        if (evt.button == 1 && !makeTransitionMode) // right click in editor window
         {
-            if(evt.type == EventType.MouseDown)
+            if (evt.type == EventType.MouseDown)
             {
-                if(getClickedWindowIndex(mousePos) == -1) // on bg
+                if (getClickedWindowIndex(mousePos) == -1) // on bg
                 {
                     GenericMenu menu = new GenericMenu();
 
@@ -58,7 +67,7 @@ public class ComboEditor : EditorWindow
         {
             int windowIndex = getClickedWindowIndex(mousePos);
 
-            if(windowIndex > -1 && !windows[windowIndex].Equals(selectedNode)) //if clicked on a window
+            if (windowIndex > -1 && !windows[windowIndex].Equals(selectedNode)) //if clicked on a window
             {
                 float halfX = windows[windowIndex].windowRect.x + (windows[windowIndex].windowRect.width / 2);
 
@@ -80,18 +89,20 @@ public class ComboEditor : EditorWindow
         {
             int windowIndex = getClickedWindowIndex(mousePos);
 
-            if(windowIndex > -1)
+            if (windowIndex > -1)
             {
                 windows[windowIndex].OnClick(mousePos);
 
                 selectedNode = windows[windowIndex];
 
                 makeTransitionMode = true;
-                
             }
         }
+    }
 
-        if(makeTransitionMode && selectedNode != null)
+    void Draw()
+    {
+        if (makeTransitionMode && selectedNode != null)
         {
             Rect mouseRect = new Rect(mousePos.x, mousePos.y, 10, 10);
 
@@ -100,14 +111,14 @@ public class ComboEditor : EditorWindow
             Repaint();
         }
 
-        foreach(BaseNode node in windows)
+        foreach (BaseNode node in windows)
         {
             node.DrawCurves();
         }
 
         BeginWindows();
 
-        for(int i = 0; i < windows.Count; ++i)
+        for (int i = 0; i < windows.Count; ++i)
         {
             windows[i].windowRect = GUI.Window(i, windows[i].windowRect, DrawNodeWindow, windows[i].windowTitle);
         }
@@ -121,6 +132,31 @@ public class ComboEditor : EditorWindow
 
         GUI.DragWindow();
     }
+
+    //private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
+    //{
+    //    int widthDivs = Mathf.CeilToInt(position.width / gridSpacing);
+    //    int heightDivs = Mathf.CeilToInt(position.height / gridSpacing);
+
+    //    Handles.BeginGUI();
+    //    Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
+
+    //    offset += drag * 0.5f;
+    //    Vector3 newOffset = new Vector3(offset.x % gridSpacing, offset.y % gridSpacing, 0);
+
+    //    for (int i = 0; i < widthDivs; i++)
+    //    {
+    //        Handles.DrawLine(new Vector3(gridSpacing * i, -gridSpacing, 0) + newOffset, new Vector3(gridSpacing * i, position.height, 0f) + newOffset);
+    //    }
+
+    //    for (int j = 0; j < heightDivs; j++)
+    //    {
+    //        Handles.DrawLine(new Vector3(-gridSpacing, gridSpacing * j, 0) + newOffset, new Vector3(position.width, gridSpacing * j, 0f) + newOffset);
+    //    }
+
+    //    Handles.color = Color.white;
+    //    Handles.EndGUI();
+    //}
 
     void ContextCallback(object _obj)
     {

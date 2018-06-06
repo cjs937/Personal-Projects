@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class ComboNode : BaseNode
+public enum ComboMove
 {
-    public enum ComboMove
-    {
-        PUNCH_1,
-        PUNCH_2,
-        KICK_1,
-        KICK_2,
-        STAR_PLATINUM_PUNCH
-    }
+    PUNCH_1,
+    PUNCH_2,
+    KICK_1,
+    KICK_2,
+    STAR_PLATINUM_PUNCH
+}
 
+
+public class ComboNode : BaseNode
+{ 
     public ComboMove comboMove;
 
     public ComboNode()
@@ -25,6 +26,8 @@ public class ComboNode : BaseNode
     public override void DrawWindow()
     {
         base.DrawWindow();
+
+        GUI.Box(windowRect, windowTitle);//, style);
 
         comboMove = (ComboMove)EditorGUILayout.EnumPopup("Input type : ", comboMove);
     }
