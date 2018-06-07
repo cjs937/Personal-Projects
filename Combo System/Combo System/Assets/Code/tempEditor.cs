@@ -292,7 +292,7 @@ public class tempEditor : EditorWindow
             connections = new List<Connection>();
         }
 
-        connections.Add(new Connection(selectedInPoint, selectedOutPoint, OnClickRemoveConnection));
+        connections.Add(new Connection(selectedInPoint, selectedOutPoint);
     }
 
     private void ClearConnectionSelection()

@@ -9,7 +9,16 @@ public class ComboEditor : EditorWindow
     List<BaseNode> clearBackup = new List<BaseNode>();
     Vector2 mousePos;
     BaseNode selectedNode;
+    ConnectionPoint selectedConnectionPoint;
+
+    private GUIStyle inPointStyle;
+    private GUIStyle outPointStyle;
+
     bool makeTransitionMode = false;
+
+
+    private Vector2 offset;
+    private Vector2 drag;
 
     //opens combo editor window
     [MenuItem("Window/Combo Editor")]
@@ -29,75 +38,89 @@ public class ComboEditor : EditorWindow
     void HandleEvents(Event _evt)
     {
         Event evt = _evt;
-
         mousePos = evt.mousePosition;
 
-        if (evt.button == 1 && !makeTransitionMode) // right click in editor window
+        switch (evt.type)
         {
-            if (evt.type == EventType.MouseDown)
-            {
-                if (getClickedWindowIndex(mousePos) == -1) // on bg
+            case EventType.MouseDrag:
+                if (evt.button == 0)
                 {
-                    GenericMenu menu = new GenericMenu();
-
-                    menu.AddItem(new GUIContent("Add Input Node"), false, ContextCallback, "inputNode");
-                    menu.AddItem(new GUIContent("Add Combo Node"), false, ContextCallback, "comboNode");
-                    menu.AddSeparator("");
-                    menu.AddItem(new GUIContent("Clear all nodes"), false, ContextCallback, "clear");
-                    menu.AddItem(new GUIContent("Undo a previous clear"), false, ContextCallback, "undoClear");
-
-
-                    menu.ShowAsContext();
-                    evt.Use();
+                    OnDrag(evt.delta);
                 }
-                else // on a window
+                break;
+            case EventType.MouseDown:
+                if (evt.button == 1 && !makeTransitionMode) // right click in editor window
                 {
-                    GenericMenu menu = new GenericMenu();
+                    if (getClickedWindowIndex(mousePos) == -1) // on bg
+                    {
+                        GenericMenu menu = new GenericMenu();
 
-                    menu.AddItem(new GUIContent("Make Transition"), false, ContextCallback, "makeTransition");
-                    menu.AddSeparator("");
-                    menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "deleteNode");
+                        menu.AddItem(new GUIContent("Add Input Node"), false, ContextCallback, "inputNode");
+                        menu.AddItem(new GUIContent("Add Combo Node"), false, ContextCallback, "comboNode");
+                        menu.AddSeparator("");
+                        menu.AddItem(new GUIContent("Clear all nodes"), false, ContextCallback, "clear");
+                        menu.AddItem(new GUIContent("Undo a previous clear"), false, ContextCallback, "undoClear");
 
-                    menu.ShowAsContext();
-                    evt.Use();
+
+                        menu.ShowAsContext();
+                        evt.Use();
+                    }
+                    else // on a window
+                    {
+                        GenericMenu menu = new GenericMenu();
+
+                        //menu.AddItem(new GUIContent("Make Transition"), false, ContextCallback, "makeTransition");
+                        //menu.AddSeparator("");
+                        menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "deleteNode");
+
+                        menu.ShowAsContext();
+                        evt.Use();
+                    }
                 }
-            }
+                else if (evt.button == 0) 
+                {
+                    if (makeTransitionMode) //left mouse when connecting two nodes
+                    {
+                        //int windowIndex = getClickedWindowIndex(mousePos);
+
+                        //if (windowIndex > -1 && !windows[windowIndex].Equals(selectedNode)) //if clicked on a window
+                        //{
+                        //    float halfX = windows[windowIndex].windowRect.x + (windows[windowIndex].windowRect.width / 2);
+
+                        //    bool isInput = mousePos.x <= halfX; // if mouse was clicked on left side of node it is input
+
+                        //    selectedNode.MakeConnection(windows[windowIndex], false);
+                        //    makeTransitionMode = false;
+                        //    selectedNode = null;
+                        //}
+                        //else if (windowIndex <= -1) //click on bg, exit transition mode
+                        //{
+                        //    makeTransitionMode = false;
+                        //    selectedNode = null;
+                        //}
+
+                        makeTransitionMode = false;
+                        selectedConnectionPoint = null;
+
+                        evt.Use();
+                    }
+                }
+                //else if (evt.button == 0 && !makeTransitionMode) //enter make transition mode
+                //{
+                //    int windowIndex = getClickedWindowIndex(mousePos);
+
+                //    if (windowIndex > -1)
+                //    {
+                //        windows[windowIndex].OnClick(mousePos);
+
+                //        selectedNode = windows[windowIndex];
+
+                //        makeTransitionMode = true;
+                //    }
+                //}
+                break;
         }
-        else if (evt.button == 0 && makeTransitionMode && evt.type == EventType.MouseDown) //left mouse when connecting two nodes
-        {
-            int windowIndex = getClickedWindowIndex(mousePos);
-
-            if (windowIndex > -1 && !windows[windowIndex].Equals(selectedNode)) //if clicked on a window
-            {
-                float halfX = windows[windowIndex].windowRect.x + (windows[windowIndex].windowRect.width / 2);
-
-                bool isInput = mousePos.x <= halfX; // if mouse was clicked on left side of node it is input
-
-                selectedNode.MakeConnection(windows[windowIndex], false);
-                makeTransitionMode = false;
-                selectedNode = null;
-            }
-            else if (windowIndex <= -1) //click on bg, exit transition mode
-            {
-                makeTransitionMode = false;
-                selectedNode = null;
-            }
-
-            evt.Use();
-        }
-        else if (evt.button == 0 && evt.type == EventType.MouseDown && !makeTransitionMode) //enter make transition mode
-        {
-            int windowIndex = getClickedWindowIndex(mousePos);
-
-            if (windowIndex > -1)
-            {
-                windows[windowIndex].OnClick(mousePos);
-
-                selectedNode = windows[windowIndex];
-
-                makeTransitionMode = true;
-            }
-        }
+        
     }
 
     void Draw()
@@ -113,7 +136,8 @@ public class ComboEditor : EditorWindow
 
         foreach (BaseNode node in windows)
         {
-            node.DrawCurves();
+            node.inPoint.Draw();
+            node.outPoint.Draw();
         }
 
         BeginWindows();
@@ -133,30 +157,45 @@ public class ComboEditor : EditorWindow
         GUI.DragWindow();
     }
 
-    //private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
-    //{
-    //    int widthDivs = Mathf.CeilToInt(position.width / gridSpacing);
-    //    int heightDivs = Mathf.CeilToInt(position.height / gridSpacing);
+    private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
+    {
+        int widthDivs = Mathf.CeilToInt(position.width / gridSpacing);
+        int heightDivs = Mathf.CeilToInt(position.height / gridSpacing);
 
-    //    Handles.BeginGUI();
-    //    Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
+        Handles.BeginGUI();
+        Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
 
-    //    offset += drag * 0.5f;
-    //    Vector3 newOffset = new Vector3(offset.x % gridSpacing, offset.y % gridSpacing, 0);
+        offset += drag * 0.5f;
+        Vector3 newOffset = new Vector3(offset.x % gridSpacing, offset.y % gridSpacing, 0);
 
-    //    for (int i = 0; i < widthDivs; i++)
-    //    {
-    //        Handles.DrawLine(new Vector3(gridSpacing * i, -gridSpacing, 0) + newOffset, new Vector3(gridSpacing * i, position.height, 0f) + newOffset);
-    //    }
+        for (int i = 0; i < widthDivs; i++)
+        {
+            Handles.DrawLine(new Vector3(gridSpacing * i, -gridSpacing, 0) + newOffset, new Vector3(gridSpacing * i, position.height, 0f) + newOffset);
+        }
 
-    //    for (int j = 0; j < heightDivs; j++)
-    //    {
-    //        Handles.DrawLine(new Vector3(-gridSpacing, gridSpacing * j, 0) + newOffset, new Vector3(position.width, gridSpacing * j, 0f) + newOffset);
-    //    }
+        for (int j = 0; j < heightDivs; j++)
+        {
+            Handles.DrawLine(new Vector3(-gridSpacing, gridSpacing * j, 0) + newOffset, new Vector3(position.width, gridSpacing * j, 0f) + newOffset);
+        }
 
-    //    Handles.color = Color.white;
-    //    Handles.EndGUI();
-    //}
+        Handles.color = Color.white;
+        Handles.EndGUI();
+    }
+
+    private void OnDrag(Vector2 delta) //drag editor window
+    {
+        drag = delta;
+
+        if (windows != null)
+        {
+            for (int i = 0; i < windows.Count; i++)
+            {
+                windows[i].Drag(delta);
+            }
+        }
+
+        GUI.changed = true;
+    }
 
     void ContextCallback(object _obj)
     {
@@ -282,6 +321,21 @@ public class ComboEditor : EditorWindow
             windows = clearBackup;
 
             clearBackup.Clear();
+        }
+    }
+
+    void OnConnectionPointClicked(ConnectionPoint _clickedPoint)
+    {
+        if (!makeTransitionMode)
+        {
+            makeTransitionMode = true;
+            selectedConnectionPoint = _clickedPoint;
+        }
+        else
+        {
+            selectedConnectionPoint.MakeConnection(_clickedPoint);
+            //makeTransitionMode = false;
+            //selectedConnectionPoint = null;
         }
     }
 }

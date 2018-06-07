@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class InputNode : BaseInputNode
+public class InputNode : BaseNode
 {
     public enum InputType
     {
@@ -17,22 +18,15 @@ public class InputNode : BaseInputNode
 
     InputType input;
 
-    public InputNode()
-    {
-        windowTitle = "Input Node";
-        prevNode = null;
-    }
+    public InputNode(Vector2 position, float width, float height, string title, GUIStyle nodeStyle, GUIStyle inPointStyle, GUIStyle outPointStyle, Action<ConnectionPoint> OnClickInPoint, Action<ConnectionPoint> OnClickOutPoint)
+        :base(position, width, height, title, nodeStyle, inPointStyle, outPointStyle, OnClickInPoint, OnClickOutPoint)
+    { }
 
     public override void DrawWindow()
     {
         base.DrawWindow();
 
         input = (InputType)EditorGUILayout.EnumPopup("Input type : ", input);
-    }
-
-    public override string getInputString()
-    {
-        return input.ToString();
     }
 
     public InputType getInput()

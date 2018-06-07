@@ -1,42 +1,32 @@
-﻿using System.Collections;
+﻿using System;
 using UnityEngine;
 using UnityEditor;
-
 public class BaseNode : ScriptableObject
 {
-    public BaseNode prevNode;
-    public BaseNode nextNode;
+    //public BaseNode prevNode;
+    //public BaseNode nextNode;
     public Rect windowRect;
     public GUIStyle style;
     public bool hasInputs = false;
 
+    public ConnectionPoint inPoint;
+    public ConnectionPoint outPoint;
+
     public string windowTitle = "";
-    
+    //public Action<BaseNode> OnRemoveNode;
+
+    public BaseNode(Vector2 position, float width, float height, string title, GUIStyle nodeStyle, GUIStyle inPointStyle, GUIStyle outPointStyle, Action<ConnectionPoint> OnClickInPoint, Action<ConnectionPoint> OnClickOutPoint)
+    {
+        windowRect = new Rect(position.x, position.y, width, height);
+        style = nodeStyle;
+        inPoint = new ConnectionPoint(this, ConnectionPointType.In, inPointStyle, OnClickInPoint);
+        outPoint = new ConnectionPoint(this, ConnectionPointType.Out, outPointStyle, OnClickOutPoint);
+        windowTitle = title;
+    }
+
     public virtual void DrawWindow()
     {
         windowTitle = EditorGUILayout.TextField("Title", windowTitle);
-    }
-
-    public virtual void DrawCurves()
-    {
-        if (nextNode)
-        {
-            ComboEditor.DrawNodeCurve(windowRect, nextNode.windowRect, Color.black);
-        }
-    }
-
-    public virtual void MakeConnection(BaseNode _connector, bool _isInput)
-    {
-        if (_isInput) //connection is incoming
-        {
-            prevNode = _connector;
-            _connector.nextNode = this;
-        }
-        else //connection is outgoing
-        {
-            nextNode = _connector;
-            _connector.prevNode = this;
-        }
     }
 
     public virtual void NodeDeleted(BaseNode _node)
@@ -44,4 +34,9 @@ public class BaseNode : ScriptableObject
 
     public virtual void OnClick(Vector2 _position)
     {}
+
+    public void Drag(Vector2 delta)
+    {
+        windowRect.position += delta;
+    }
 }

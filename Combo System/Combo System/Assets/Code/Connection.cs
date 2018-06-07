@@ -8,11 +8,11 @@ public class Connection
     public ConnectionPoint outPoint;
     public Action<Connection> OnClickRemoveConnection;
 
-    public Connection(ConnectionPoint inPoint, ConnectionPoint outPoint, Action<Connection> OnClickRemoveConnection)
+    public Connection(ConnectionPoint inPoint, ConnectionPoint outPoint)//, Action<Connection> OnClickRemoveConnection)
     {
         this.inPoint = inPoint;
         this.outPoint = outPoint;
-        this.OnClickRemoveConnection = OnClickRemoveConnection;
+       /// this.OnClickRemoveConnection = OnClickRemoveConnection;
     }
 
     public void Draw()
@@ -27,12 +27,19 @@ public class Connection
             2f
         );
 
-        if (Handles.Button((inPoint.rect.center + outPoint.rect.center) * 0.5f, Quaternion.identity, 4, 8, Handles.RectangleCap))
+        if (Handles.Button((inPoint.rect.center + outPoint.rect.center) * 0.5f, Quaternion.identity, 4, 8, Handles.RectangleHandleCap))
         {
-            if (OnClickRemoveConnection != null)
-            {
-                OnClickRemoveConnection(this);
-            }
+            //if (OnClickRemoveConnection != null)
+            //{
+            //    OnClickRemoveConnection(this);
+            //}
+            remove();
         }
+    }
+
+    void remove()
+    {
+        inPoint.removeConnection(this);
+        outPoint.removeConnection(this);
     }
 }
