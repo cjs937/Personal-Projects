@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -17,11 +18,9 @@ public class ComboNode : BaseNode
 { 
     public ComboMove comboMove;
 
-    public ComboNode()
-    {
-        windowTitle = "Combo Node";
-        prevNode = null;
-    }
+    public ComboNode(Vector2 position, float width, float height, string title, GUIStyle nodeStyle, GUIStyle inPointStyle, GUIStyle outPointStyle, Action<ConnectionPoint> OnClickInPoint, Action<ConnectionPoint> OnClickOutPoint)
+        : base(position, width, height, title, nodeStyle, inPointStyle, outPointStyle, OnClickInPoint, OnClickOutPoint)
+    {}
 
     public override void DrawWindow()
     {
@@ -32,48 +31,48 @@ public class ComboNode : BaseNode
         comboMove = (ComboMove)EditorGUILayout.EnumPopup("Input type : ", comboMove);
     }
 
-    public override void MakeConnection(BaseNode _connector, bool _isInput)
-    {
-        //prevents combo nodes from connecting to each other
-        if(_connector as ComboNode)
-        {
-            return;
-        }
-        else
-        {
-            Debug.Log("fug");
-            base.MakeConnection(_connector, _isInput);
-        }
-    }
+    //public override void MakeConnection(BaseNode _connector, bool _isInput)
+    //{
+    //    //prevents combo nodes from connecting to each other
+    //    if(_connector as ComboNode)
+    //    {
+    //        return;
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("fug");
+    //        base.MakeConnection(_connector, _isInput);
+    //    }
+    //}
 
 
-    public override void DrawCurves()
-    {
-        if (nextNode)
-        {
-            ComboEditor.DrawNodeCurve(windowRect, nextNode.windowRect, Color.red);
-        }
-    }
+    //public override void DrawCurves()
+    //{
+    //    if (nextNode)
+    //    {
+    //        ComboEditor.DrawNodeCurve(windowRect, nextNode.windowRect, Color.red);
+    //    }
+    //}
 
 
-    public string getComboString()
-    {
-        string comboString = "";
+    //public string getComboString()
+    //{
+    //    string comboString = "";
 
-        BaseNode lastNode = prevNode;
+    //    BaseNode lastNode = prevNode;
 
-        while (lastNode)
-        {
-            InputNode inputNode = (InputNode)lastNode;
+    //    while (lastNode)
+    //    {
+    //        InputNode inputNode = (InputNode)lastNode;
 
-            if (inputNode)
-            {
-                comboString.Insert(0, inputNode.getInputString() + ",");
-            }
+    //        if (inputNode)
+    //        {
+    //            comboString.Insert(0, inputNode.getInputString() + ",");
+    //        }
 
-            lastNode = lastNode.prevNode;
-        }
+    //        lastNode = lastNode.prevNode;
+    //    }
 
-        return comboString;
-    }
+    //    return comboString;
+    //}
 }

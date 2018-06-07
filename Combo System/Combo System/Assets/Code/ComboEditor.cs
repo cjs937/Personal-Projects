@@ -11,6 +11,8 @@ public class ComboEditor : EditorWindow
     BaseNode selectedNode;
     ConnectionPoint selectedConnectionPoint;
 
+
+    private GUIStyle nodeStyle;
     private GUIStyle inPointStyle;
     private GUIStyle outPointStyle;
 
@@ -59,7 +61,7 @@ public class ComboEditor : EditorWindow
                         menu.AddItem(new GUIContent("Add Combo Node"), false, ContextCallback, "comboNode");
                         menu.AddSeparator("");
                         menu.AddItem(new GUIContent("Clear all nodes"), false, ContextCallback, "clear");
-                        menu.AddItem(new GUIContent("Undo a previous clear"), false, ContextCallback, "undoClear");
+                        //menu.AddItem(new GUIContent("Undo a previous clear"), false, ContextCallback, "undoClear");
 
 
                         menu.ShowAsContext();
@@ -203,39 +205,37 @@ public class ComboEditor : EditorWindow
 
         if(callback.Equals("inputNode"))
         {
-            InputNode inputNode = new InputNode();
-            inputNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
+            InputNode inputNode = new InputNode(mousePos, 200, 150, "Input Node", nodeStyle, inPointStyle, outPointStyle, OnConnectionPointClicked, OnConnectionPointClicked);
 
             windows.Add(inputNode);
         }
         else if(callback.Equals("comboNode"))
         {
-            ComboNode comboNode = new ComboNode();
-            comboNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 100);
+            ComboNode comboNode = new ComboNode(mousePos, 200, 100, "Combo Node", nodeStyle, inPointStyle, outPointStyle, OnConnectionPointClicked, OnConnectionPointClicked);
 
             windows.Add(comboNode);
         }
-        else if (callback.Equals("makeTransition"))
-        {
-            bool clickedOnWindow = false;
-            int selectIndex = -1;
+        //else if (callback.Equals("makeTransition"))
+        //{
+        //    bool clickedOnWindow = false;
+        //    int selectIndex = -1;
 
-            for (int i = 0; i < windows.Count; ++i)
-            {
-                if (windows[i].windowRect.Contains(mousePos))
-                {
-                    selectIndex = i;
-                    clickedOnWindow = true;
-                    break;
-                }
-            }
+        //    for (int i = 0; i < windows.Count; ++i)
+        //    {
+        //        if (windows[i].windowRect.Contains(mousePos))
+        //        {
+        //            selectIndex = i;
+        //            clickedOnWindow = true;
+        //            break;
+        //        }
+        //    }
 
-            if(clickedOnWindow)
-            {
-                selectedNode = windows[selectIndex];
-                makeTransitionMode = true;
-            }
-        }
+        //    if(clickedOnWindow)
+        //    {
+        //        selectedNode = windows[selectIndex];
+        //        makeTransitionMode = true;
+        //    }
+        //}
         else if (callback.Equals("deleteNode"))
         {
             bool clickedOnWindow = false;
@@ -266,10 +266,10 @@ public class ComboEditor : EditorWindow
         {
             clearNodes();
         }
-        else if (callback.Equals("undoClear"))
-        {
-            undoClear();
-        }
+        //else if (callback.Equals("undoClear"))
+        //{
+        //    undoClear();
+        //}
     }
 
     public static void DrawNodeCurve(Rect start, Rect end, Color color)
