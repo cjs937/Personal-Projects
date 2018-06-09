@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public enum ConnectionPointType { In, Out }
 
+[System.Serializable]
 public class ConnectionPoint
 {
     public Rect rect;
@@ -16,9 +18,12 @@ public class ConnectionPoint
 
     public Action<ConnectionPoint> OnClickConnectionPoint;
 
-    public List<Connection> connections;
+    public List<int> connectionIDs;
 
-    public ConnectionPoint(BaseNode node, ConnectionPointType type, GUIStyle style, Action<ConnectionPoint> OnClickConnectionPoint)
+    [SerializeField]
+    Color lineColor;
+
+    public ConnectionPoint(BaseNode node, ConnectionPointType type, GUIStyle style, Action<ConnectionPoint> OnClickConnectionPoint, Color _lineColor)
     {
         this.node = node;
         this.type = type;
@@ -26,7 +31,9 @@ public class ConnectionPoint
         this.OnClickConnectionPoint = OnClickConnectionPoint;
         rect = new Rect(0, 0, 10f, 20f);
 
-        connections = new List<Connection>();
+        lineColor = _lineColor;
+
+        connectionIDs = new List<int>();
     }
 
     public void Draw()
@@ -36,11 +43,11 @@ public class ConnectionPoint
         switch (type)
         {
             case ConnectionPointType.In:
-                rect.x = node.windowRect.x - rect.width + 8f;
+                rect.x = node.windowRect.x - rect.width;
                 break;
 
             case ConnectionPointType.Out:
-                rect.x = node.windowRect.x + node.windowRect.width - 8f;
+                rect.x = node.windowRect.x + node.windowRect.width;
                 break;
         }
 
@@ -52,36 +59,41 @@ public class ConnectionPoint
             }
         }
 
-        //if this is output connection draw curves
-        if(type == ConnectionPointType.Out)
-        {
-            foreach(Connection connection in connections)
-            {
-                connection.Draw();
-            }
-        }
+        ////if this is output connection draw curves
+        //if(type == ConnectionPointType.Out)
+        //{
+        //    foreach(Connection connection in connections)
+        //    {
+        //        connection.Draw(lineColor);
+        //    }
+        //}
     }
 
-    public void MakeConnection(ConnectionPoint _connector, Connection _existingConnection = null)
+    public Connection MakeConnection(ConnectionPoint _connector, int _newId, Action<Connection> _onClickRemoveConnection)
     {
-        Connection newConnect = _existingConnection;
+        if (_connector.type == type || _connector.node == node)
+            return null;
 
-        if (newConnect == null)
-        {
-            if (type == ConnectionPointType.In)
-                newConnect = new Connection(this, _connector);
-            else
-                newConnect = new Connection(_connector, this);
-        }
+        Connection newConnect;
 
-        connections.Add(newConnect);
+        if (type == ConnectionPointType.In)
+            newConnect = new Connection(this, _connector, _onClickRemoveConnection);
+        else
+            newConnect = new Connection(_connector, this, _onClickRemoveConnection);
+        
 
-        if (_existingConnection == null) //if the connection was created in this function add it to the other point in this connection
-            _connector.MakeConnection(this, newConnect);
+        newConnect.connectionId = _newId;
+
+        connectionIDs.Add(newConnect.connectionId);
+
+        //if (_existingConnection == null) //if the connection was created in this function add it to the other point in this connection
+        //    _connector.MakeConnection(this, newConnect);
+
+        return newConnect;
     }
 
-    public void removeConnection(Connection _toRemove)
+    public void removeConnection(int _toRemoveID)
     {
-        connections.Remove(_toRemove);
+        connectionIDs.Remove(_toRemoveID);
     }
 }

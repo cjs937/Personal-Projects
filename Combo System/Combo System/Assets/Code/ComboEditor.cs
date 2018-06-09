@@ -5,12 +5,15 @@ using UnityEditor;
 
 public class ComboEditor : EditorWindow
 {
-    List<BaseNode> windows = new List<BaseNode>();
-    List<BaseNode> clearBackup = new List<BaseNode>();
+   // List<BaseNode> windows = new List<BaseNode>();
+    //List<BaseNode> clearBackup = new List<BaseNode>();
     Vector2 mousePos;
     BaseNode selectedNode;
     ConnectionPoint selectedConnectionPoint;
 
+    int currentObjectIndex = 0;
+    List<ComboEditorObject> editorObjects;
+    string[] objectNames;
 
     private GUIStyle nodeStyle;
     private GUIStyle inPointStyle;
@@ -18,9 +21,10 @@ public class ComboEditor : EditorWindow
 
     bool makeTransitionMode = false;
 
+    //private Vector2 offset;
+    private Vector2 drag = Vector2.zero;
 
-    private Vector2 offset;
-    private Vector2 drag;
+    List<Connection> deadConnections;
 
     //opens combo editor window
     [MenuItem("Window/Combo Editor")]
@@ -30,28 +34,57 @@ public class ComboEditor : EditorWindow
         editor.titleContent = new GUIContent("Combo Editor");
     }
 
+    private void OnEnable()
+    {
+        nodeStyle = new GUIStyle();
+        nodeStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
+        nodeStyle.border = new RectOffset(12, 12, 12, 12);
+
+        inPointStyle = new GUIStyle();
+        inPointStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn left.png") as Texture2D;
+        inPointStyle.active.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn left on.png") as Texture2D;
+        inPointStyle.border = new RectOffset(4, 4, 12, 12);
+
+        outPointStyle = new GUIStyle();
+        outPointStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn right.png") as Texture2D;
+        outPointStyle.active.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn right on.png") as Texture2D;
+        outPointStyle.border = new RectOffset(4, 4, 12, 12);
+    }
+
     private void OnGUI()
     {
-        HandleEvents(Event.current);
+        //Reload();
 
-        Draw();
+        if (editorObjects.Count > 0)//if there are objects to edit
+        {
+            HandleEvents(Event.current);
+
+            Draw();
+        }
+        else //if there are not objects to edit draws the dropdown to select one
+            currentObjectIndex = EditorGUILayout.Popup(currentObjectIndex, objectNames);
+
+        ClearDeadConnections();
+
+        if (GUI.changed) Repaint();
     }
 
     void HandleEvents(Event _evt)
     {
         Event evt = _evt;
         mousePos = evt.mousePosition;
+        drag = Vector2.zero;
 
         switch (evt.type)
         {
             case EventType.MouseDrag:
-                if (evt.button == 0)
+                if (evt.button == 0 && !selectedNode)
                 {
                     OnDrag(evt.delta);
                 }
                 break;
             case EventType.MouseDown:
-                if (evt.button == 1 && !makeTransitionMode) // right click in editor window
+                if (evt.button == 1 && !makeTransitionMode) // right click on bg
                 {
                     if (getClickedWindowIndex(mousePos) == -1) // on bg
                     {
@@ -61,18 +94,16 @@ public class ComboEditor : EditorWindow
                         menu.AddItem(new GUIContent("Add Combo Node"), false, ContextCallback, "comboNode");
                         menu.AddSeparator("");
                         menu.AddItem(new GUIContent("Clear all nodes"), false, ContextCallback, "clear");
-                        //menu.AddItem(new GUIContent("Undo a previous clear"), false, ContextCallback, "undoClear");
+                        menu.AddItem(new GUIContent("Reload editor"), false, ContextCallback, "reload");
 
 
                         menu.ShowAsContext();
                         evt.Use();
                     }
-                    else // on a window
+                    else // right click on a node
                     {
                         GenericMenu menu = new GenericMenu();
 
-                        //menu.AddItem(new GUIContent("Make Transition"), false, ContextCallback, "makeTransition");
-                        //menu.AddSeparator("");
                         menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, "deleteNode");
 
                         menu.ShowAsContext();
@@ -81,80 +112,68 @@ public class ComboEditor : EditorWindow
                 }
                 else if (evt.button == 0) 
                 {
-                    if (makeTransitionMode) //left mouse when connecting two nodes
+                    int clickedWindowIndex = getClickedWindowIndex(mousePos);
+
+                    if (clickedWindowIndex > -1)
                     {
-                        //int windowIndex = getClickedWindowIndex(mousePos);
-
-                        //if (windowIndex > -1 && !windows[windowIndex].Equals(selectedNode)) //if clicked on a window
-                        //{
-                        //    float halfX = windows[windowIndex].windowRect.x + (windows[windowIndex].windowRect.width / 2);
-
-                        //    bool isInput = mousePos.x <= halfX; // if mouse was clicked on left side of node it is input
-
-                        //    selectedNode.MakeConnection(windows[windowIndex], false);
-                        //    makeTransitionMode = false;
-                        //    selectedNode = null;
-                        //}
-                        //else if (windowIndex <= -1) //click on bg, exit transition mode
-                        //{
-                        //    makeTransitionMode = false;
-                        //    selectedNode = null;
-                        //}
-
-                        makeTransitionMode = false;
+                        selectedNode = editorObjects[currentObjectIndex].windows[clickedWindowIndex];
+                    }
+                    else
+                    {
+                        selectedNode = null;
                         selectedConnectionPoint = null;
-
-                        evt.Use();
+                        makeTransitionMode = false;
                     }
                 }
-                //else if (evt.button == 0 && !makeTransitionMode) //enter make transition mode
-                //{
-                //    int windowIndex = getClickedWindowIndex(mousePos);
 
-                //    if (windowIndex > -1)
-                //    {
-                //        windows[windowIndex].OnClick(mousePos);
-
-                //        selectedNode = windows[windowIndex];
-
-                //        makeTransitionMode = true;
-                //    }
-                //}
+                //evt.Use();
                 break;
         }
-        
     }
 
     void Draw()
     {
-        if (makeTransitionMode && selectedNode != null)
+        DrawGrid(20, 0.2f, Color.gray);
+        DrawGrid(100, 0.4f, Color.gray);
+
+        if (makeTransitionMode && selectedConnectionPoint != null)
         {
             Rect mouseRect = new Rect(mousePos.x, mousePos.y, 10, 10);
 
-            DrawNodeCurve(selectedNode.windowRect, mouseRect, Color.blue);
+            DrawNodeCurve(selectedConnectionPoint.rect, mouseRect, Color.blue);
 
             Repaint();
         }
 
-        foreach (BaseNode node in windows)
+
+        foreach (BaseNode node in editorObjects[currentObjectIndex].windows)
         {
             node.inPoint.Draw();
             node.outPoint.Draw();
         }
 
+        foreach (Connection connection in editorObjects[currentObjectIndex].connections)
+        {
+            connection.Draw(Color.white);
+        }
+
         BeginWindows();
 
-        for (int i = 0; i < windows.Count; ++i)
+        for (int i = 0; i < editorObjects[currentObjectIndex].windows.Count; ++i)
         {
-            windows[i].windowRect = GUI.Window(i, windows[i].windowRect, DrawNodeWindow, windows[i].windowTitle);
+            editorObjects[currentObjectIndex].windows[i].windowRect = GUI.Window(i, editorObjects[currentObjectIndex].windows[i].windowRect, DrawNodeWindow,
+                editorObjects[currentObjectIndex].windows[i].windowTitle);
         }
 
         EndWindows();
+        
+
+        currentObjectIndex = EditorGUILayout.Popup(currentObjectIndex, objectNames);
     }
 
     void DrawNodeWindow(int id)
     {
-        windows[id].DrawWindow();
+        editorObjects[currentObjectIndex].windows[id].DrawWindow();
 
         GUI.DragWindow();
     }
@@ -167,8 +186,8 @@ public class ComboEditor : EditorWindow
         Handles.BeginGUI();
         Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
 
-        offset += drag * 0.5f;
-        Vector3 newOffset = new Vector3(offset.x % gridSpacing, offset.y % gridSpacing, 0);
+        editorObjects[currentObjectIndex].offset += drag * 0.5f;
+        Vector3 newOffset = new Vector3(editorObjects[currentObjectIndex].offset.x % gridSpacing, editorObjects[currentObjectIndex].offset.y % gridSpacing, 0);
 
         for (int i = 0; i < widthDivs; i++)
         {
@@ -188,11 +207,11 @@ public class ComboEditor : EditorWindow
     {
         drag = delta;
 
-        if (windows != null)
+        if (editorObjects[currentObjectIndex].windows != null)
         {
-            for (int i = 0; i < windows.Count; i++)
+            for (int i = 0; i < editorObjects[currentObjectIndex].windows.Count; i++)
             {
-                windows[i].Drag(delta);
+                editorObjects[currentObjectIndex].windows[i].Drag(delta);
             }
         }
 
@@ -203,47 +222,26 @@ public class ComboEditor : EditorWindow
     {
         string callback = _obj.ToString();
 
-        if(callback.Equals("inputNode"))
+        if(callback.Equals("inputNode")) //make new input node
         {
             InputNode inputNode = new InputNode(mousePos, 200, 150, "Input Node", nodeStyle, inPointStyle, outPointStyle, OnConnectionPointClicked, OnConnectionPointClicked);
 
-            windows.Add(inputNode);
+            editorObjects[currentObjectIndex].windows.Add(inputNode);
         }
-        else if(callback.Equals("comboNode"))
+        else if(callback.Equals("comboNode")) //make new combo node
         {
             ComboNode comboNode = new ComboNode(mousePos, 200, 100, "Combo Node", nodeStyle, inPointStyle, outPointStyle, OnConnectionPointClicked, OnConnectionPointClicked);
 
-            windows.Add(comboNode);
+            editorObjects[currentObjectIndex].windows.Add(comboNode);
         }
-        //else if (callback.Equals("makeTransition"))
-        //{
-        //    bool clickedOnWindow = false;
-        //    int selectIndex = -1;
-
-        //    for (int i = 0; i < windows.Count; ++i)
-        //    {
-        //        if (windows[i].windowRect.Contains(mousePos))
-        //        {
-        //            selectIndex = i;
-        //            clickedOnWindow = true;
-        //            break;
-        //        }
-        //    }
-
-        //    if(clickedOnWindow)
-        //    {
-        //        selectedNode = windows[selectIndex];
-        //        makeTransitionMode = true;
-        //    }
-        //}
         else if (callback.Equals("deleteNode"))
         {
             bool clickedOnWindow = false;
             int selectIndex = -1;
 
-            for (int i = 0; i < windows.Count; ++i)
+            for (int i = 0; i < editorObjects[currentObjectIndex].windows.Count; ++i)
             {
-                if (windows[i].windowRect.Contains(mousePos))
+                if (editorObjects[currentObjectIndex].windows[i].windowRect.Contains(mousePos))
                 {
                     selectIndex = i;
                     clickedOnWindow = true;
@@ -253,10 +251,10 @@ public class ComboEditor : EditorWindow
 
             if(clickedOnWindow)
             {
-                BaseNode selNode = windows[selectIndex];
-                windows.RemoveAt(selectIndex);
+                BaseNode selNode = editorObjects[currentObjectIndex].windows[selectIndex];
+                editorObjects[currentObjectIndex].windows.RemoveAt(selectIndex);
 
-                foreach(BaseNode node in windows)
+                foreach(BaseNode node in editorObjects[currentObjectIndex].windows)
                 {
                     node.NodeDeleted(selNode);
                 }
@@ -265,6 +263,10 @@ public class ComboEditor : EditorWindow
         else if (callback.Equals("clear"))
         {
             clearNodes();
+        }
+        else if (callback.Equals("reload"))
+        {
+            Reload();
         }
         //else if (callback.Equals("undoClear"))
         //{
@@ -292,11 +294,16 @@ public class ComboEditor : EditorWindow
     //if this returns -1 no window was clicked
     int getClickedWindowIndex(Vector2 _mousePos)
     {
+        if (editorObjects.Count == 0)
+            return -1;
+
         int selectIndex = -1;
 
-        for (int i = 0; i < windows.Count; ++i)
+        for (int i = 0; i < editorObjects[currentObjectIndex].windows.Count; ++i)
         {
-            if (windows[i].windowRect.Contains(_mousePos))
+            if (editorObjects[currentObjectIndex].windows[i].windowRect.Contains(_mousePos) 
+                || editorObjects[currentObjectIndex].windows[i].inPoint.rect.Contains(_mousePos) 
+                || editorObjects[currentObjectIndex].windows[i].outPoint.rect.Contains(_mousePos))
             {
                 selectIndex = i;
                 break;
@@ -308,21 +315,23 @@ public class ComboEditor : EditorWindow
 
     void clearNodes()
     {
-        clearBackup = windows;
+        //clearBackup = windows;
 
-        windows.Clear();
+        editorObjects[currentObjectIndex].windows.Clear();
+        editorObjects[currentObjectIndex].connections.Clear();
+
     }
 
-    void undoClear()
-    {
-        if (clearBackup.Count > 0)
-        {
-            Debug.Log("works");
-            windows = clearBackup;
+    //void undoClear()
+    //{
+    //    if (clearBackup.Count > 0)
+    //    {
+    //        Debug.Log("works");
+    //        windows = clearBackup;
 
-            clearBackup.Clear();
-        }
-    }
+    //        clearBackup.Clear();
+    //    }
+    //}
 
     void OnConnectionPointClicked(ConnectionPoint _clickedPoint)
     {
@@ -333,9 +342,69 @@ public class ComboEditor : EditorWindow
         }
         else
         {
-            selectedConnectionPoint.MakeConnection(_clickedPoint);
-            //makeTransitionMode = false;
-            //selectedConnectionPoint = null;
+            Connection newConnection = selectedConnectionPoint.MakeConnection(_clickedPoint, editorObjects[currentObjectIndex].connections.Count + 1, RemoveConnection);
+
+            if (newConnection != null)
+                editorObjects[currentObjectIndex].connections.Add(newConnection);
+
+            makeTransitionMode = false;
+            selectedConnectionPoint = null;
+        }
+    }
+
+    void RemoveConnection(Connection _toRemove)
+    {
+        if (editorObjects.Count == 0)
+            return;
+
+        deadConnections.Add(_toRemove);
+        //editorObjects[currentObjectIndex].connections.Remove(_toRemove);
+    }
+
+    void ClearDeadConnections()
+    {
+        foreach(Connection deadConnection in deadConnections)
+        {
+            editorObjects[currentObjectIndex].connections.Remove(deadConnection);
+        }
+
+        deadConnections.Clear();
+    }
+
+    void Reload()
+    {
+        //Init list for dropdown of editor objects
+        editorObjects = new List<ComboEditorObject>();
+        deadConnections = new List<Connection>();
+
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("ComboEditorObject"))
+        {
+            ComboEditorObject objectScript = obj.GetComponent<ComboEditorObject>();
+
+            if (!objectScript)
+                continue;
+
+            objectScript.initIfNew();
+
+            foreach(BaseNode node in objectScript.windows)
+            {
+                node.inPoint.OnClickConnectionPoint = OnConnectionPointClicked;
+                node.outPoint.OnClickConnectionPoint = OnConnectionPointClicked;
+            }
+
+            foreach(Connection connection in objectScript.connections)
+            {
+                connection.onClickRemoveConnection = RemoveConnection;
+            }
+
+            editorObjects.Add(objectScript);
+        }
+
+        objectNames = new string[editorObjects.Count];
+
+        for (int i = 0; i < editorObjects.Count; ++i)
+        {
+            objectNames[i] = editorObjects[i].gameObject.name;
         }
     }
 }

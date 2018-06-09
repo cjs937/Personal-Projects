@@ -19,7 +19,7 @@ public class ComboNode : BaseNode
     public ComboMove comboMove;
 
     public ComboNode(Vector2 position, float width, float height, string title, GUIStyle nodeStyle, GUIStyle inPointStyle, GUIStyle outPointStyle, Action<ConnectionPoint> OnClickInPoint, Action<ConnectionPoint> OnClickOutPoint)
-        : base(position, width, height, title, nodeStyle, inPointStyle, outPointStyle, OnClickInPoint, OnClickOutPoint)
+        : base(position, width, height, title, nodeStyle, inPointStyle, outPointStyle, OnClickInPoint, OnClickOutPoint, NodeType.COMBO)
     {}
 
     public override void DrawWindow()

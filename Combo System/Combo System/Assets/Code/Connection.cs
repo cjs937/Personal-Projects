@@ -2,44 +2,50 @@
 using UnityEditor;
 using UnityEngine;
 
+[System.Serializable]
 public class Connection
 {
     public ConnectionPoint inPoint;
     public ConnectionPoint outPoint;
-    public Action<Connection> OnClickRemoveConnection;
+    public Action<Connection> onClickRemoveConnection;
 
-    public Connection(ConnectionPoint inPoint, ConnectionPoint outPoint)//, Action<Connection> OnClickRemoveConnection)
+    public int connectionId;
+
+    public Connection(ConnectionPoint inPoint, ConnectionPoint outPoint, Action<Connection> _onClickRemoveConnection)
     {
         this.inPoint = inPoint;
         this.outPoint = outPoint;
-       /// this.OnClickRemoveConnection = OnClickRemoveConnection;
+
+        onClickRemoveConnection = _onClickRemoveConnection;
     }
 
-    public void Draw()
+    public void Draw(Color _color)
     {
         Handles.DrawBezier(
             inPoint.rect.center,
             outPoint.rect.center,
             inPoint.rect.center + Vector2.left * 50f,
             outPoint.rect.center - Vector2.left * 50f,
-            Color.white,
+            _color,
             null,
             2f
         );
 
         if (Handles.Button((inPoint.rect.center + outPoint.rect.center) * 0.5f, Quaternion.identity, 4, 8, Handles.RectangleHandleCap))
         {
-            //if (OnClickRemoveConnection != null)
-            //{
-            //    OnClickRemoveConnection(this);
-            //}
-            remove();
+            inPoint.removeConnection(connectionId);
+            outPoint.removeConnection(connectionId);
+
+            onClickRemoveConnection(this);
+
+            //remove();
         }
     }
 
     void remove()
     {
-        inPoint.removeConnection(this);
-        outPoint.removeConnection(this);
+        //inPoint.removeConnection(this);
+        //outPoint.removeConnection(this);
+
     }
 }
