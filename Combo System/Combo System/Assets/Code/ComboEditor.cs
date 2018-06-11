@@ -36,6 +36,8 @@ public class ComboEditor : EditorWindow
 
     private void OnEnable()
     {
+        Reload();
+
         nodeStyle = new GUIStyle();
         nodeStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
         nodeStyle.border = new RectOffset(12, 12, 12, 12);
@@ -148,6 +150,12 @@ public class ComboEditor : EditorWindow
 
         foreach (BaseNode node in editorObjects[currentObjectIndex].windows)
         {
+            if (node.inPoint == null || node.outPoint == null)
+                Debug.Log("you're fucked nigger");
+            else
+                Debug.Log(node.windowRect.position);
+
+
             node.inPoint.Draw();
             node.outPoint.Draw();
         }

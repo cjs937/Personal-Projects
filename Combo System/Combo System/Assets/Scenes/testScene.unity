@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a646375084b823a41afb159212c651d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offset: {x: 297, y: 341}
+  offset: {x: -339, y: 251}
   windows:
   - {fileID: 1565487981}
   - {fileID: 998873296}
@@ -161,8 +161,7 @@ MonoBehaviour:
       style:
         m_Name: 
         m_Normal:
-          m_Background: {fileID: -137945306764144326, guid: 0000000000000000d000000000000000,
-            type: 0}
+          m_Background: {fileID: 0}
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Hover:
@@ -170,8 +169,7 @@ MonoBehaviour:
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Active:
-          m_Background: {fileID: 7748859771797447999, guid: 0000000000000000d000000000000000,
-            type: 0}
+          m_Background: {fileID: 0}
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Focused:
@@ -241,8 +239,7 @@ MonoBehaviour:
       style:
         m_Name: 
         m_Normal:
-          m_Background: {fileID: 5361632866341858327, guid: 0000000000000000d000000000000000,
-            type: 0}
+          m_Background: {fileID: 0}
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Hover:
@@ -250,8 +247,7 @@ MonoBehaviour:
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Active:
-          m_Background: {fileID: 4979192565147231929, guid: 0000000000000000d000000000000000,
-            type: 0}
+          m_Background: {fileID: 0}
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Focused:
@@ -322,8 +318,7 @@ MonoBehaviour:
       style:
         m_Name: 
         m_Normal:
-          m_Background: {fileID: -137945306764144326, guid: 0000000000000000d000000000000000,
-            type: 0}
+          m_Background: {fileID: 0}
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Hover:
@@ -331,8 +326,7 @@ MonoBehaviour:
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Active:
-          m_Background: {fileID: 7748859771797447999, guid: 0000000000000000d000000000000000,
-            type: 0}
+          m_Background: {fileID: 0}
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Focused:
@@ -402,8 +396,7 @@ MonoBehaviour:
       style:
         m_Name: 
         m_Normal:
-          m_Background: {fileID: 5361632866341858327, guid: 0000000000000000d000000000000000,
-            type: 0}
+          m_Background: {fileID: 0}
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Hover:
@@ -411,8 +404,7 @@ MonoBehaviour:
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Active:
-          m_Background: {fileID: 4979192565147231929, guid: 0000000000000000d000000000000000,
-            type: 0}
+          m_Background: {fileID: 0}
           m_ScaledBackgrounds: []
           m_TextColor: {r: 0, g: 0, b: 0, a: 1}
         m_Focused:
@@ -534,6 +526,99 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &874339038
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 874339040}
+  - component: {fileID: 874339039}
+  - component: {fileID: 874339041}
+  m_Layer: 0
+  m_Name: JotaroKujo_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!212 &874339039
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 874339038}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 21300002, guid: f619c5e1307417c45ad9ae63b52aa340, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.76000005, y: 1.25}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+--- !u!4 &874339040
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 874339038}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.782, y: -1.2802666, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &874339041
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 874339038}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 3b2c93a003441f24bb50daa05b51efce, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &998873296
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -547,15 +632,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRect:
     serializedVersion: 2
-    x: 1003
-    y: 382
+    x: 430
+    y: 262
     width: 200
     height: 100
   style:
     m_Name: 
     m_Normal:
-      m_Background: {fileID: -3453378117783705200, guid: 0000000000000000d000000000000000,
-        type: 0}
+      m_Background: {fileID: 0}
       m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
@@ -623,8 +707,8 @@ MonoBehaviour:
   inPoint:
     rect:
       serializedVersion: 2
-      x: 993
-      y: 422
+      x: 420
+      y: 302
       width: 10
       height: 20
     type: 0
@@ -632,8 +716,7 @@ MonoBehaviour:
     style:
       m_Name: 
       m_Normal:
-        m_Background: {fileID: -137945306764144326, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Hover:
@@ -641,8 +724,7 @@ MonoBehaviour:
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Active:
-        m_Background: {fileID: 7748859771797447999, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Focused:
@@ -703,8 +785,8 @@ MonoBehaviour:
   outPoint:
     rect:
       serializedVersion: 2
-      x: 1203
-      y: 422
+      x: 630
+      y: 302
       width: 10
       height: 20
     type: 1
@@ -712,8 +794,7 @@ MonoBehaviour:
     style:
       m_Name: 
       m_Normal:
-        m_Background: {fileID: 5361632866341858327, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Hover:
@@ -721,8 +802,7 @@ MonoBehaviour:
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Active:
-        m_Background: {fileID: 4979192565147231929, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Focused:
@@ -796,15 +876,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRect:
     serializedVersion: 2
-    x: 706
-    y: 347
+    x: 125
+    y: 243
     width: 200
     height: 150
   style:
     m_Name: 
     m_Normal:
-      m_Background: {fileID: -3453378117783705200, guid: 0000000000000000d000000000000000,
-        type: 0}
+      m_Background: {fileID: 0}
       m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
@@ -872,8 +951,8 @@ MonoBehaviour:
   inPoint:
     rect:
       serializedVersion: 2
-      x: 696
-      y: 412
+      x: 115
+      y: 308
       width: 10
       height: 20
     type: 0
@@ -881,8 +960,7 @@ MonoBehaviour:
     style:
       m_Name: 
       m_Normal:
-        m_Background: {fileID: -137945306764144326, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Hover:
@@ -890,8 +968,7 @@ MonoBehaviour:
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Active:
-        m_Background: {fileID: 7748859771797447999, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Focused:
@@ -952,8 +1029,8 @@ MonoBehaviour:
   outPoint:
     rect:
       serializedVersion: 2
-      x: 906
-      y: 412
+      x: 325
+      y: 308
       width: 10
       height: 20
     type: 1
@@ -961,8 +1038,7 @@ MonoBehaviour:
     style:
       m_Name: 
       m_Normal:
-        m_Background: {fileID: 5361632866341858327, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Hover:
@@ -970,8 +1046,7 @@ MonoBehaviour:
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Active:
-        m_Background: {fileID: 4979192565147231929, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Focused:
@@ -1087,15 +1162,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowRect:
     serializedVersion: 2
-    x: 1333
-    y: 304
+    x: 688
+    y: 237
     width: 200
     height: 150
   style:
     m_Name: 
     m_Normal:
-      m_Background: {fileID: -3453378117783705200, guid: 0000000000000000d000000000000000,
-        type: 0}
+      m_Background: {fileID: 0}
       m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
@@ -1163,8 +1237,8 @@ MonoBehaviour:
   inPoint:
     rect:
       serializedVersion: 2
-      x: 1323
-      y: 369
+      x: 678
+      y: 302
       width: 10
       height: 20
     type: 0
@@ -1172,8 +1246,7 @@ MonoBehaviour:
     style:
       m_Name: 
       m_Normal:
-        m_Background: {fileID: -137945306764144326, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Hover:
@@ -1181,8 +1254,7 @@ MonoBehaviour:
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Active:
-        m_Background: {fileID: 7748859771797447999, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Focused:
@@ -1243,8 +1315,8 @@ MonoBehaviour:
   outPoint:
     rect:
       serializedVersion: 2
-      x: 1533
-      y: 369
+      x: 888
+      y: 302
       width: 10
       height: 20
     type: 1
@@ -1252,8 +1324,7 @@ MonoBehaviour:
     style:
       m_Name: 
       m_Normal:
-        m_Background: {fileID: 5361632866341858327, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Hover:
@@ -1261,8 +1332,7 @@ MonoBehaviour:
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Active:
-        m_Background: {fileID: 4979192565147231929, guid: 0000000000000000d000000000000000,
-          type: 0}
+        m_Background: {fileID: 0}
         m_ScaledBackgrounds: []
         m_TextColor: {r: 0, g: 0, b: 0, a: 1}
       m_Focused:
@@ -1322,3 +1392,77 @@ MonoBehaviour:
     lineColor: {r: 1, g: 1, b: 1, a: 1}
   windowTitle: Input Node
   type: 0
+--- !u!1 &1701079262
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1701079264}
+  - component: {fileID: 1701079263}
+  m_Layer: 0
+  m_Name: JotaroKujo_15
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!212 &1701079263
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1701079262}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 21300030, guid: f619c5e1307417c45ad9ae63b52aa340, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.86, y: 1.24}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+--- !u!4 &1701079264
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1701079262}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.7120701, y: -1.3005921, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
