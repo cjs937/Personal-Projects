@@ -151,7 +151,7 @@ public class ComboEditor : EditorWindow
         foreach (BaseNode node in editorObjects[currentObjectIndex].windows)
         {
             if (node.inPoint == null || node.outPoint == null)
-                Debug.Log("you're fucked nigger");
+                Debug.Log("aaaaaa");
             else
                 Debug.Log(node.windowRect.position);
 
