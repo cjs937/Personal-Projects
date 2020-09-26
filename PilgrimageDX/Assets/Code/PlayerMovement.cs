@@ -39,7 +39,7 @@ public class PlayerMovement : MonoBehaviour
 
         Move(new Vector3(HorizontalAxis, 0, -VerticalAxis));
 
-        Debug.Log(new Vector2(HorizontalAxis, VerticalAxis));
+        //Debug.Log(new Vector2(HorizontalAxis, VerticalAxis));
     }
 
     void Move(Vector3 direction)
@@ -49,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
         moveVec = (camera.transform.forward * direction.z + camera.transform.right * direction.x) * moveSpeed * Time.deltaTime;
         moveVec.y = 0;
 
-        if (!checkMovementMask(moveVec.normalized, raycastDistance))//!checkMovementRaycast(moveVec.normalized, raycastDistance))
+        if (!checkMovementRaycast(moveVec.normalized, raycastDistance))
         {
             transform.Translate(moveVec);
         }
@@ -100,24 +100,24 @@ public class PlayerMovement : MonoBehaviour
         return false;
     }
 
-    bool getAllowedMovement(Vector3 moveVec, ref Vector3 allowedMoveVec)
-    {
-        //check movement for each direction if one fails
-        //call move allowed to check
-        // if an allowed movement is found, the return the ref
-        // if not, return false
-
-        bool anyMoveAllowed = true;
-        Vector3 direction = moveVec.normalized;
-        //float checkDistance = 
-        Vector3 bottom = collider.transform.TransformPoint(collider.center);
-        bottom.y = bottom.y - collider.height / 2;
-
-        Vector3 top = collider.transform.TransformPoint(collider.center);
-        top.y = top.y + collider.height / 2;
-
-        return Physics.CapsuleCast(bottom, top, collider.radius, direction, distance, raycastLayerMask.value);
-    }
+    //bool getAllowedMovement(Vector3 moveVec, ref Vector3 allowedMoveVec)
+    //{
+    //    //check movement for each direction if one fails
+    //    //call move allowed to check
+    //    // if an allowed movement is found, the return the ref
+    //    // if not, return false
+    //
+    //    bool anyMoveAllowed = true;
+    //    Vector3 direction = moveVec.normalized;
+    //    //float checkDistance = 
+    //    Vector3 bottom = collider.transform.TransformPoint(collider.center);
+    //    bottom.y = bottom.y - collider.height / 2;
+    //
+    //    Vector3 top = collider.transform.TransformPoint(collider.center);
+    //    top.y = top.y + collider.height / 2;
+    //
+    //    return Physics.CapsuleCast(bottom, top, collider.radius, direction, distance, raycastLayerMask.value);
+    //}
 
     //bool moveAllowed(Vector3 direction, float distance)
     //{
