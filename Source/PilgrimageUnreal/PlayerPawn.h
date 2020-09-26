@@ -18,6 +18,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* MeshComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeed;
+	
+	UPROPERTY(BlueprintReadWrite)
+	FVector CurrentVelocity;
+
+	UFUNCTION(BlueprintCallable)
+	void Move_X(float AxisValue);
+
+	UFUNCTION(BlueprintCallable)
+	void Move_Y(float AxisValue);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
