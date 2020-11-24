@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "PlayerPawn.generated.h"
 
+class UCapsuleComponent;
+
 UCLASS()
 class PILGRIMAGEUNREAL_API APlayerPawn : public APawn
 {
@@ -16,7 +18,10 @@ public:
 	APlayerPawn();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* MeshComponent;
+	USkeletalMeshComponent* SkeletalMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UCapsuleComponent* CapsuleComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;

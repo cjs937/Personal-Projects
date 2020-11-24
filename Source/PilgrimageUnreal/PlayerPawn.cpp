@@ -4,14 +4,19 @@
 #include "PlayerPawn.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/CapsuleComponent.h"
+
 // Sets default values
 APlayerPawn::APlayerPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("MeshComponent");
-	SetRootComponent(MeshComponent);
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
+	CapsuleComponent->SetSimulatePhysics(true);
+	SetRootComponent(CapsuleComponent);
+
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
 }
 
 // Called when the game starts or when spawned
