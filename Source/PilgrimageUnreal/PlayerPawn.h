@@ -7,7 +7,9 @@
 #include "PlayerPawn.generated.h"
 
 class UCapsuleComponent;
-
+class UStateMachine;
+class USpringArmComponent;
+class UCameraComponent;
 UCLASS()
 class PILGRIMAGEUNREAL_API APlayerPawn : public APawn
 {
@@ -22,6 +24,22 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UCameraComponent* Camera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USpringArmComponent* CameraRig;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USceneComponent* CameraMask;
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPawnMovementComponent* MovementComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStateMachine* StateMachine;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;

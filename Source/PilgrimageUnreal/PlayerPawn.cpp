@@ -5,6 +5,11 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "StateMachine.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -17,6 +22,20 @@ APlayerPawn::APlayerPawn()
 	SetRootComponent(CapsuleComponent);
 
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
+	SkeletalMesh->SetupAttachment(GetRootComponent());
+
+	CameraRig = CreateDefaultSubobject<USpringArmComponent>("CameraRig");
+	CameraRig->SetupAttachment(GetRootComponent());
+	CameraRig->TargetArmLength = 700.0f;
+
+	CameraMask = CreateDefaultSubobject<USceneComponent>("CameraMask");
+	CameraMask->SetupAttachment(CameraRig);	
+
+	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	Camera->SetupAttachment(GetRootComponent());
+
+	MovementComponent = CreateDefaultSubobject<UPawnMovementComponent>("MovementComponent");
+	StateMachine = CreateDefaultSubobject<UStateMachine>("StateMachine");
 }
 
 // Called when the game starts or when spawned
