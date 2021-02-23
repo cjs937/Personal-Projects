@@ -4,17 +4,9 @@
 #include "PlayerStateMachine.h"
 #include "PlayerPawn.h"
 
-void UPlayerStateMachine::BeginPlay()
+void UPlayerStateMachine::Initialize()
 {
-	Super::BeginPlay();
-
 	PlayerPawn = (APlayerPawn*)GetOwner();
 
-	//if (!IsValid(PlayerPawn))
-	//{
-	//	
-	//	
-	//
-	//	//UE_LOG(LogTemp, Error, TEXT("PlayerStateMachine %s not attached to a player pawn", GetNameSafe());
-	//}
+	UStateMachine::Initialize();
 }

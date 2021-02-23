@@ -14,8 +14,8 @@ class PILGRIMAGEUNREAL_API UPlayerStateMachine : public UStateMachine
 	GENERATED_BODY()
 
 public:
-
-	virtual void BeginPlay() override;
-
 	APlayerPawn* PlayerPawn;
+
+protected:
+	virtual void Initialize() override;
 };

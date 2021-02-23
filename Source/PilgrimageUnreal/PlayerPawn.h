@@ -7,11 +7,40 @@
 #include "PlayerPawn.generated.h"
 
 class UCapsuleComponent;
-class UStateMachine;
 class USpringArmComponent;
 class UCameraComponent;
 class UFloatingPawnMovement;
 class UAnimationStateData;
+class UPlayerStateMachine;
+
+#pragma region State Flags
+UENUM()
+enum ELocomotionState //: uint16
+{
+	Idle = 0,
+	Run,
+	Jump_Rise,
+	Jump_Idle,
+	Land,
+	Wall_Cling
+};
+
+USTRUCT(BlueprintType)
+struct PILGRIMAGEUNREAL_API FStateFlags
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY(BlueprintReadWrite)
+		TEnumAsByte<ELocomotionState> LocomotionState = Idle;
+
+	UPROPERTY(BlueprintReadWrite)
+		bool bMovementAllowed = true;
+
+	UPROPERTY(BlueprintReadWrite)
+		bool bCameraMovementAllowed = true;
+};
+#pragma endregion 
 
 UCLASS()
 class PILGRIMAGEUNREAL_API APlayerPawn : public APawn
@@ -42,12 +71,12 @@ public:
 	UFloatingPawnMovement* MovementComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UStateMachine* StateMachine;
+	UPlayerStateMachine* StateMachine;
 
 #pragma endregion
 
 	UPROPERTY(BlueprintReadWrite)
-	UAnimationStateData* AnimationState;
+	FStateFlags StateFlags;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;
@@ -63,12 +92,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	FVector CurrentVelocity;
-
-	UPROPERTY(BlueprintReadWrite)
-	bool bMovementAllowed = true;
-
-	UPROPERTY(BlueprintReadWrite)
-	bool bCameraMovementAllowed = true;
 #pragma region Functions
 public:
 
@@ -82,10 +105,10 @@ public:
 	void ApplyLocomotion(float SpeedScalar);
 
 	UFUNCTION(BlueprintCallable)
-	void SetMovementAllowed(bool isAllowed) { bMovementAllowed = isAllowed; };
+	void SetMovementAllowed(bool isAllowed) { StateFlags.bMovementAllowed = isAllowed; };
 
 	UFUNCTION(BlueprintCallable)
-	void SetCameraMovementAllowed(bool isAllowed) { bCameraMovementAllowed = isAllowed; };
+	void SetCameraMovementAllowed(bool isAllowed) { StateFlags.bCameraMovementAllowed = isAllowed; };
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector2D MoveAxisInput;

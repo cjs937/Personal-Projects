@@ -18,7 +18,7 @@ DEFINE_LOG_CATEGORY(LogStateMachine);
 
 
 UStateMachine::UStateMachine() :
-	_initialStateID(nullptr)
+	InitialState(nullptr)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
@@ -28,18 +28,19 @@ UStateMachine::UStateMachine() :
 void UStateMachine::BeginPlay()
 {
 	Super::BeginPlay();
-	Initialize();
+
+	this->Initialize();
 }
 
-void UStateMachine::RegisterState(UStateKey* stateID, TSubclassOf<UStateBase> stateClass)
+void UStateMachine::RegisterState(TSubclassOf<UStateBase> stateClass)
 {
-	_availableStates.Add(stateID, stateClass);
+	AvailableStates.Add(stateClass);
 }
 
 
-void UStateMachine::SetInitialState(UStateKey* stateID)
+void UStateMachine::SetInitialState(TSubclassOf<UStateBase> stateClass)
 {
-	_initialStateID = stateID;
+	InitialState = stateClass;
 }
 
 void UStateMachine::SetLogTransitions(bool bLogTransitions)
@@ -51,63 +52,68 @@ void UStateMachine::SetLogTransitions(bool bLogTransitions)
 void UStateMachine::Initialize()
 {
 	UStateBase* state;
+	TSubclassOf<UStateBase> StateClass;
 
-	for (auto& stateInfo : _availableStates)
+	for (int i = 0; i < AvailableStates.Num(); ++i)
 	{
-		UStateKey* key = stateInfo.Key;
+		StateClass = AvailableStates[i];
 
-		if (key == nullptr)
+		if (IsValid(StateClass) && !StateMap.Contains(StateClass))
 		{
-			UE_LOG(LogStateMachine, Error, TEXT("A null key was specified in the \"Available States\" map. Please verify that the map is populated with the expected values."));
-			continue;
-		}
+			AActor* Owner = GetOwner();
+			ensureMsgf(IsValid(Owner), TEXT("StateMachine unable to get owner on state %s."), *GetNameSafe(this));
 
-		if (stateInfo.Value.Get() == nullptr)
+			state = NewObject<UStateBase>(Owner->GetRootComponent(), StateClass, StateClass->GetFName());
+			state->SetStateMachine(this);
+			state->RegisterComponent();
+
+			StateMap.Add(StateClass, state);
+		}
+		else
 		{
-			UE_LOG(LogStateMachine, Error, TEXT("A null value was specified in the \"Available States\" map for the key named \"%s\"."), *key->GetFName().ToString());
-			continue;
+			if (!IsValid(StateClass))
+			{
+				UE_LOG(LogStateMachine, Error, TEXT("A null key was specified in the \"Available States\" map. Please verify that the map is populated with the expected values."));
+				continue;
+			}
+			else
+			{
+				UE_LOG(LogStateMachine, Error, TEXT("A duplicate key was specified in the \"Available States\" map. Please verify that the map is populated with the expected values."));
+				continue;
+			}
+			
 		}
-
-		AActor* Owner = GetOwner();
-		ensureMsgf(IsValid(Owner), TEXT("StateMachine unable to get owner on state %s."), *GetNameSafe(this));
-
-		state = NewObject<UStateBase>(Owner->GetRootComponent(), stateInfo.Value, stateInfo.Key->GetFName());
-		state->SetStateMachine(this);
-		state->RegisterComponent();
-
-		_idToState.Add(stateInfo.Key, state);
 	}
 
-	if (_initialStateID != nullptr)
+	if (IsValid(InitialState))
 	{
-		Request(_initialStateID);
+		Request(InitialState);
 	}
 	else
 	{
-		UE_LOG(LogStateMachine, Warning, TEXT("The initial state ID is a null value! (%s)"), *GetOwner()->GetName());
+		UE_LOG(LogStateMachine, Warning, TEXT("The initial state is a null value! (%s)"), *GetOwner()->GetName());
 	}
 }
 
 
-EStateMachineResult UStateMachine::Request(UStateKey* stateID)
+EStateMachineResult UStateMachine::Request(TSubclassOf<UStateBase> StateClass)
 {
 	UStateBase* nextState;
 
-	EStateMachineResult result = TryGetState(stateID, nextState);
-
-	_nextStateID = stateID;
-	_nextStatePtr = nextState;
+	EStateMachineResult result = TryGetState(StateClass, nextState);
 		
 	if (result != EStateMachineResult::SUCCESS)
 	{
-		if (stateID != nullptr)
-		{
-			UE_LOG(LogStateMachine, Error, TEXT("Failed to request state named \"%s\"!"), *stateID->GetFName().ToString());
-		}
-		else
-		{
-			UE_LOG(LogStateMachine, Error, TEXT("Unable to request a null state!"));
-		}
+		//if (stateID != nullptr)
+		//{
+		//	UE_LOG(LogStateMachine, Error, TEXT("Failed to request state named \"%s\"!"), *stateID->GetFName().ToString());
+		//}
+		//else
+		//{
+		//	UE_LOG(LogStateMachine, Error, TEXT("Unable to request a null state!"));
+		//}
+
+		UE_LOG(LogStateMachine, Error, TEXT("Unable to request a null state!"));
 
 		if(!bSuppressStateChangeEvents)
 			OnStateChanged.Broadcast(result);
@@ -121,20 +127,19 @@ EStateMachineResult UStateMachine::Request(UStateKey* stateID)
 		if (_logTransitions)
 		{
 			UE_LOG(LogStateMachine, Log, TEXT("%s exiting state: %s. Time: %s, FrameCount: %d"), 
-				*GetNameSafe(GetOwner()), *_currentStateID->GetFName().ToString(), *FDateTime::Now().ToString(), GFrameNumber);
+				*GetNameSafe(GetOwner()), *_currentStatePtr->GetFName().ToString(), *FDateTime::Now().ToString(), GFrameNumber);
 		}
 	}
 
-	_previousStateID = _currentStateID;
 	_previousStatePtr = _currentStatePtr;
 
-	_currentStateID = stateID;
 	_currentStatePtr = nextState;
 	_currentStatePtr->Enter();
+
 	if (_logTransitions)
 	{
 		UE_LOG(LogStateMachine, Log, TEXT("%s entering state: %s. Time: %s, FrameCount: %d"),
-			*GetNameSafe(GetOwner()), *_currentStateID->GetFName().ToString(), *FDateTime::Now().ToString(), GFrameNumber);
+			*GetNameSafe(GetOwner()), *_currentStatePtr->GetFName().ToString(), *FDateTime::Now().ToString(), GFrameNumber);
 	}
 
 	if(!bSuppressStateChangeEvents)
@@ -143,10 +148,9 @@ EStateMachineResult UStateMachine::Request(UStateKey* stateID)
 	return EStateMachineResult::SUCCESS;
 }
 
-
-EStateMachineResult UStateMachine::TryGetState(UStateKey* stateID, UStateBase* &state)
+EStateMachineResult UStateMachine::TryGetState(TSubclassOf<UStateBase> StateClass, UStateBase* &state)
 {
-	TWeakObjectPtr<UStateBase>* pValue = _idToState.Find(stateID);
+	TWeakObjectPtr<UStateBase>* pValue = StateMap.Find(StateClass);//_idToState.Find(stateID);
 	TWeakObjectPtr<UStateBase> result;
 
 	if(pValue == nullptr)
@@ -160,11 +164,11 @@ EStateMachineResult UStateMachine::TryGetState(UStateKey* stateID, UStateBase* &
 		const AActor* Owner = GetOwner();
 		ensureMsgf(IsValid(Owner), TEXT("TryGetState unable to get owner for state %s."), *GetNameSafe(this));
 
-		result = NewObject<UStateBase>(Owner->GetRootComponent(), _availableStates[stateID], stateID->GetFName());
+		result = NewObject<UStateBase>(Owner->GetRootComponent(), StateClass, StateClass->GetFName());
 		result->SetStateMachine(this);
 		result->RegisterComponent();
 			
-		UE_LOG(LogStateMachine, Warning, TEXT("_idToState contained trashed state for \"%s\"! Using work-around."), *stateID->GetFName().ToString());
+		UE_LOG(LogStateMachine, Warning, TEXT("_idToState contained trashed state for \"%s\"! Using work-around."), *StateClass->GetFName().ToString());
 	}
 
 	if (!result.IsValid())
@@ -175,34 +179,12 @@ EStateMachineResult UStateMachine::TryGetState(UStateKey* stateID, UStateBase* &
 	return EStateMachineResult::SUCCESS;
 }
 
-
 UStateBase* UStateMachine::GetCurrentState() const
 {
 	return _currentStatePtr;
-}
-
-UStateKey* UStateMachine::GetCurrentID() const
-{
-	return _currentStateID;
 }
 
 UStateBase * UStateMachine::GetPreviousState() const
 {
 	return _previousStatePtr;
 }
-
-UStateKey * UStateMachine::GetPreviousID() const
-{
-	return _previousStateID;
-}
-
-UStateBase * UStateMachine::GetNextState() const
-{
-	return _nextStatePtr;
-}
-
-UStateKey * UStateMachine::GetNextID() const
-{
-	return _nextStateID;
-}
-

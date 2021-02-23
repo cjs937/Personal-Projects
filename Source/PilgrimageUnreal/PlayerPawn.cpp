@@ -6,7 +6,7 @@
 #include "Components/InputComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "StateMachine.h"
+#include "PlayerStateMachine.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
@@ -36,7 +36,7 @@ APlayerPawn::APlayerPawn()
 	Camera->SetupAttachment(GetRootComponent());
 
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComponent");
-	StateMachine = CreateDefaultSubobject<UStateMachine>("StateMachine");
+	StateMachine = CreateDefaultSubobject<UPlayerStateMachine>("StateMachine");
 }
 
 // Called when the game starts or when spawned
@@ -56,12 +56,12 @@ void APlayerPawn::Tick(float DeltaTime)
 	CameraAxisInput.X = GetInputAxisValue("R_Horizontal");
 	CameraAxisInput.Y = GetInputAxisValue("R_Vertical");
 
-	if (bCameraMovementAllowed)
+	if (StateFlags.bCameraMovementAllowed)
 	{
 		UpdateCameraRig();
 	}
 
-	if (bMovementAllowed)
+	if (StateFlags.bMovementAllowed && MoveAxisInput != FVector2D::ZeroVector)
 	{
 		ApplyLocomotion(MoveSpeed);
 	}
@@ -71,11 +71,17 @@ void APlayerPawn::Tick(float DeltaTime)
 void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	UWorld* World = GetWorld();
+
+	if (IsValid(World))
+		EnableInput(GetWorld()->GetFirstPlayerController());
 
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 	//
-	//InputComponent->BindAxis("L_Horizontal", this, &APlayerPawn::Move_Y);
-	//InputComponent->BindAxis("L_Vertical", this, &APlayerPawn::Move_X);
+	InputComponent->BindAxis("L_Horizontal");/*, this, &APlayerPawn::Move_Y);*/
+	InputComponent->BindAxis("L_Vertical");  /*, this, &APlayerPawn::Move_X);*/
+	InputComponent->BindAxis("R_Horizontal");
+	InputComponent->BindAxis("R_Vertical");
 }
 
 void APlayerPawn::ApplyLocomotion(float SpeedScalar)
