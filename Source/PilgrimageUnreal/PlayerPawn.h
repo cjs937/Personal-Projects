@@ -10,6 +10,9 @@ class UCapsuleComponent;
 class UStateMachine;
 class USpringArmComponent;
 class UCameraComponent;
+class UFloatingPawnMovement;
+class UAnimationStateData;
+
 UCLASS()
 class PILGRIMAGEUNREAL_API APlayerPawn : public APawn
 {
@@ -19,6 +22,7 @@ public:
 	// Sets default values for this pawn's properties
 	APlayerPawn();
 
+#pragma region Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* SkeletalMesh;
 
@@ -34,34 +38,68 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USceneComponent* CameraMask;
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UPawnMovementComponent* MovementComponent;
+	UFloatingPawnMovement* MovementComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UStateMachine* StateMachine;
 
+#pragma endregion
+
+	UPROPERTY(BlueprintReadWrite)
+	UAnimationStateData* AnimationState;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CamRotateSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CamSmoothing;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D CameraPitchRestraints;
+
 	UPROPERTY(BlueprintReadWrite)
 	FVector CurrentVelocity;
 
-	UFUNCTION(BlueprintCallable)
-	void Move_X(float AxisValue);
+	UPROPERTY(BlueprintReadWrite)
+	bool bMovementAllowed = true;
 
-	UFUNCTION(BlueprintCallable)
-	void Move_Y(float AxisValue);
+	UPROPERTY(BlueprintReadWrite)
+	bool bCameraMovementAllowed = true;
+#pragma region Functions
+public:
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
+	void ApplyLocomotion(float SpeedScalar);
+
+	UFUNCTION(BlueprintCallable)
+	void SetMovementAllowed(bool isAllowed) { bMovementAllowed = isAllowed; };
+
+	UFUNCTION(BlueprintCallable)
+	void SetCameraMovementAllowed(bool isAllowed) { bCameraMovementAllowed = isAllowed; };
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector2D MoveAxisInput;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector2D CameraAxisInput;
+
+protected:
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateCameraRig();
+
+#pragma endregion
 };

@@ -27,10 +27,9 @@ UCLASS(Abstract, Blueprintable)
 class PILGRIMAGEUNREAL_API UStateBase : public UActorComponent
 {
 	GENERATED_BODY()
+protected:
 
 	TWeakObjectPtr<UObject> _owner;
-
-protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void EnterState();
@@ -49,7 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IStateMachineBase> GetStateMachine();
 	
-	void SetStateMachine(TScriptInterface<IStateMachineBase> owner);
+	virtual void SetStateMachine(TScriptInterface<IStateMachineBase> owner);
 
 	// Variable that determines if the component tick is enabled on entry to the state.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

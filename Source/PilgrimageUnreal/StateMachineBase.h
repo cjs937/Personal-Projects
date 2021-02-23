@@ -36,6 +36,7 @@ class UStateMachineBase : public UInterface
 	GENERATED_BODY()
 };
 
+class UStateBase;
 
 /**
  * Basic interface to control the State Machine.
@@ -47,17 +48,18 @@ class PILGRIMAGEUNREAL_API IStateMachineBase
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintCallable)
-	virtual EStateMachineResult Request(UStateKey* stateID) = 0;
+	virtual EStateMachineResult Request(TSubclassOf<UStateBase> StateClass) = 0;
 
 	UFUNCTION(BlueprintCallable)
-	virtual UStateKey* GetCurrentID() const = 0;
+	virtual UStateBase* GetCurrentState() const = 0;
+
+	//
+	//UFUNCTION(BlueprintCallable)
+	//virtual UStateKey* GetPreviousID() const = 0;
+	//
+	//UFUNCTION(BlueprintCallable)
+	//virtual UStateKey* GetNextID() const = 0;
 
 	UFUNCTION(BlueprintCallable)
-	virtual UStateKey* GetPreviousID() const = 0;
-
-	UFUNCTION(BlueprintCallable)
-	virtual UStateKey* GetNextID() const = 0;
-
-	UFUNCTION(BlueprintCallable)
-	virtual EStateMachineResult TryGetState(UStateKey* stateID, class UStateBase* &state) = 0;
+	virtual EStateMachineResult TryGetState(TSubclassOf<UStateBase> StateClass, UStateBase* &state) = 0;
 };

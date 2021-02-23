@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -34,7 +35,7 @@ APlayerPawn::APlayerPawn()
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	Camera->SetupAttachment(GetRootComponent());
 
-	MovementComponent = CreateDefaultSubobject<UPawnMovementComponent>("MovementComponent");
+	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComponent");
 	StateMachine = CreateDefaultSubobject<UStateMachine>("StateMachine");
 }
 
@@ -49,13 +50,21 @@ void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//AddMovementInput(FVector(CurrentVelocity.X, CurrentVelocity.Y, 0.0f), MoveSpeed);
-	//
-	//CurrentVelocity = FVector::ZeroVector;
+	MoveAxisInput.X = GetInputAxisValue("L_Horizontal");
+	MoveAxisInput.Y = GetInputAxisValue("L_Vertical");
 
-	//CurrentVelocity.Z = -9.8f;
-	//FVector NewLocation = GetActorLocation() + (CurrentVelocity * DeltaTime);
-	//SetActorLocation(NewLocation, true);	
+	CameraAxisInput.X = GetInputAxisValue("R_Horizontal");
+	CameraAxisInput.Y = GetInputAxisValue("R_Vertical");
+
+	if (bCameraMovementAllowed)
+	{
+		UpdateCameraRig();
+	}
+
+	if (bMovementAllowed)
+	{
+		ApplyLocomotion(MoveSpeed);
+	}
 }
 
 // Called to bind functionality to input
@@ -69,12 +78,42 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	//InputComponent->BindAxis("L_Vertical", this, &APlayerPawn::Move_X);
 }
 
-void APlayerPawn::Move_X(float AxisValue)
-{	
-	CurrentVelocity.X = AxisValue; //* MoveSpeed;
+void APlayerPawn::ApplyLocomotion(float SpeedScalar)
+{
+	FVector2D MoveVec = MoveAxisInput.X * (FVector2D)GetActorRightVector() + MoveAxisInput.Y * (FVector2D)GetActorForwardVector();
+
+	MoveVec = MoveVec.X * (FVector2D)Camera->GetForwardVector() + MoveVec.Y * (FVector2D)Camera->GetRightVector();
+
+	AddMovementInput(FVector(MoveVec.X, MoveVec.Y, 0.0f), SpeedScalar);
+
+	//Set rotation to look in direction of movement
+	FRotator Rotation = SkeletalMesh->GetComponentRotation();
+	Rotation.Yaw = UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, FVector(MoveVec.X, MoveVec.Y, 0.0f).GetSafeNormal()).Yaw;
+
+	SkeletalMesh->SetWorldRotation(Rotation);
 }
 
-void APlayerPawn::Move_Y(float AxisValue)
+void APlayerPawn::UpdateCameraRig()
 {
-	CurrentVelocity.Y = AxisValue; //* MoveSpeed;
+	if (!IsValid(GetWorld()))
+	{
+		return;
+	}
+
+	float dt = GetWorld()->GetDeltaSeconds();
+	//Update camera rig rotation
+	FRotator NewRotation = CameraRig->GetComponentRotation();
+
+	NewRotation.Pitch += CameraAxisInput.Y * -1.0f * CamRotateSpeed * dt;
+	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, CameraPitchRestraints.X, CameraPitchRestraints.Y);
+
+	NewRotation.Yaw += CameraAxisInput.X * CamRotateSpeed * dt;
+
+	CameraRig->SetWorldRotation(NewRotation);
+
+	//Smooth the actual camera to match the position of the mask
+	FVector Campos = FMath::VInterpTo(Camera->GetComponentLocation(), CameraMask->GetComponentLocation(), dt, CamSmoothing);
+	FRotator Camrot = FMath::RInterpTo(Camera->GetComponentRotation(), UKismetMathLibrary::FindLookAtRotation(CameraMask->GetComponentLocation(), CameraRig->GetComponentLocation()), dt, CamSmoothing);
+
+	Camera->SetWorldLocationAndRotation(Campos, Camrot);
 }

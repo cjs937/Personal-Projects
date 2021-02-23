@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PilgrimageUnreal/StateBase.h"
+#include "PlayerStateBase.h"
 #include "PlayerIdleState.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class PILGRIMAGEUNREAL_API UPlayerIdleState : public UStateBase
+class PILGRIMAGEUNREAL_API UPlayerIdleState : public UPlayerStateBase
 {
 	GENERATED_BODY()
-	
+
+	void Enter() override;
+
+	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
 };

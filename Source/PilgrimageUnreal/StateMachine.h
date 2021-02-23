@@ -90,6 +90,11 @@ protected:
 	// Initializes the state machine.
 	void Initialize();
 
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<TSubclassOf<UStateBase>, TSubclassOf<UStateBase>> TestMap;
+
 public:
 	UStateMachine();
 
