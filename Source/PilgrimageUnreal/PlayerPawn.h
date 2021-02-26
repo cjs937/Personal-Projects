@@ -20,7 +20,7 @@ enum ELocomotionState //: uint16
 	Idle = 0,
 	Run,
 	Jump_Rise,
-	Jump_Idle,
+	Jump_Fall,
 	Land,
 	Wall_Cling
 };
@@ -38,7 +38,7 @@ public:
 		bool bMovementAllowed = true;
 
 	UPROPERTY(BlueprintReadWrite)
-		bool bCameraMovementAllowed = true;
+	bool bCameraMovementAllowed = true;
 };
 #pragma endregion 
 
@@ -71,16 +71,16 @@ public:
 	UFloatingPawnMovement* MovementComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UPlayerStateMachine* StateMachine;
+	UPlayerStateMachine* PlayerStateMachine;
 
 #pragma endregion
-
-	UPROPERTY(BlueprintReadWrite)
-	FStateFlags StateFlags;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MidJumpMoveSpeed;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CamRotateSpeed;
 
@@ -90,8 +90,42 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D CameraPitchRestraints;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float GroundCheckRayDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
+	float JumpForce;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
+	float JumpStartupTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
+	float MidJumpForce;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
+	float MidJumpGravity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
+	float MaxJumpHoldTime;
+
+	UPROPERTY(BlueprintReadWrite)
+	int NumJumps = 0;
+
+	UPROPERTY(BlueprintReadWrite)
+	FStateFlags StateFlags;
+
 	UPROPERTY(BlueprintReadWrite)
 	FVector CurrentVelocity;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector2D MoveAxisInput;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector2D CameraAxisInput;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bJumpInputHeld;
+
 #pragma region Functions
 public:
 
@@ -110,19 +144,31 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetCameraMovementAllowed(bool isAllowed) { StateFlags.bCameraMovementAllowed = isAllowed; };
 
-	UPROPERTY(BlueprintReadOnly)
-	FVector2D MoveAxisInput;
+	UFUNCTION(BlueprintCallable)
+	void ResetMovementFlags();
 
-	UPROPERTY(BlueprintReadOnly)
-	FVector2D CameraAxisInput;
+	UFUNCTION(BlueprintCallable)
+	bool IsGrounded();
 
+	UFUNCTION(BlueprintCallable)
+	bool IsGrounded(FHitResult& OutHitResult);
 protected:
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateCameraRig();
 
+	UFUNCTION(BlueprintCallable)
+	void OnJumpPressed();
+
+	UFUNCTION(BlueprintCallable)
+	void OnJumpReleased();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateJump();
+
+	UFUNCTION(BlueprintCallable)
+	bool SetLocoomtionState(ELocomotionState NewState);
 #pragma endregion
 };

@@ -11,6 +11,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "WorldCollision.h"
+#include "PlayerStates.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -36,7 +38,7 @@ APlayerPawn::APlayerPawn()
 	Camera->SetupAttachment(GetRootComponent());
 
 	MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>("MovementComponent");
-	StateMachine = CreateDefaultSubobject<UPlayerStateMachine>("StateMachine");
+	PlayerStateMachine = CreateDefaultSubobject<UPlayerStateMachine>("StateMachine");
 }
 
 // Called when the game starts or when spawned
@@ -61,9 +63,14 @@ void APlayerPawn::Tick(float DeltaTime)
 		UpdateCameraRig();
 	}
 
+	if (StateFlags.LocomotionState == Jump_Rise || StateFlags.LocomotionState == Jump_Fall)
+	{
+		UpdateJump();
+	}
+
 	if (StateFlags.bMovementAllowed && MoveAxisInput != FVector2D::ZeroVector)
 	{
-		ApplyLocomotion(MoveSpeed);
+		ApplyLocomotion(IsGrounded().bBlockingHit ? MoveSpeed : MidJumpMoveSpeed);
 	}
 }
 
@@ -82,6 +89,10 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	InputComponent->BindAxis("L_Vertical");  /*, this, &APlayerPawn::Move_X);*/
 	InputComponent->BindAxis("R_Horizontal");
 	InputComponent->BindAxis("R_Vertical");
+
+
+	InputComponent->BindAction("Jump", IE_Pressed, this, &APlayerPawn::OnJumpPressed);
+	InputComponent->BindAction("Jump", IE_Released, this, &APlayerPawn::OnJumpReleased);
 }
 
 void APlayerPawn::ApplyLocomotion(float SpeedScalar)
@@ -122,4 +133,71 @@ void APlayerPawn::UpdateCameraRig()
 	FRotator Camrot = FMath::RInterpTo(Camera->GetComponentRotation(), UKismetMathLibrary::FindLookAtRotation(CameraMask->GetComponentLocation(), CameraRig->GetComponentLocation()), dt, CamSmoothing);
 
 	Camera->SetWorldLocationAndRotation(Campos, Camrot);
+}
+
+void APlayerPawn::ResetMovementFlags()
+{
+	StateFlags.bMovementAllowed = true;
+	StateFlags.bCameraMovementAllowed = true;
+}
+
+bool APlayerPawn::IsGrounded()
+{
+	FHitResult HitResult;
+
+	return IsGrounded(HitResult);
+}
+
+bool APlayerPawn::IsGrounded(FHitResult& OutHitResult)
+{
+	FHitResult HitResult;
+	UWorld* World = GetWorld();
+
+	if (!IsValid(World))
+		return true;
+
+	FVector TraceStart = CapsuleComponent->GetComponentLocation();
+	FVector TraceEnd = TraceStart + (GetActorUpVector() * -1.0f) * GroundCheckRayDistance;
+
+	World->LineTraceSingleByProfile(HitResult, TraceStart, TraceEnd, "BlockAll");
+
+	return HitResult.bBlockingHit;	
+}
+
+void APlayerPawn::UpdateJump()
+{
+	FVector Force;
+
+	if (StateFlags.LocomotionState == Jump_Rise)
+	{
+		Force = FVector::UpVector * MidJumpForce;
+	}
+	else
+	{
+		Force = FVector::UpVector * -1.0f * MidJumpGravity;
+	}
+
+	CapsuleComponent->AddForce(Force);
+}
+
+void APlayerPawn::OnJumpPressed()
+{
+	if (NumJumps < 2)
+	{
+		PlayerStateMachine->Request(UPlayerJumpState::StaticClass());
+	}
+
+	bJumpInputHeld = true;
+}
+
+void APlayerPawn::OnJumpReleased()
+{
+	bJumpInputHeld = false;
+}	
+
+bool APlayerPawn::SetLocoomtionState(ELocomotionState NewState)
+{
+	StateFlags.LocomotionState = NewState;
+
+	return true;
 }

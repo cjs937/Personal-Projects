@@ -3,10 +3,12 @@
 
 #include "PlayerIdleState.h"
 #include "PilgrimageUnreal/PlayerStateMachine.h"
-#include "PilgrimageUnreal/PlayerPawn.h"
+#include "PlayerRunState.h"
 
 void UPlayerIdleState::Enter()
 {
+	UStateBase::Enter();
+
 	PlayerPawn->SetMovementAllowed(true);
 	PlayerPawn->SetCameraMovementAllowed(true);
 
@@ -15,8 +17,8 @@ void UPlayerIdleState::Enter()
 
 void UPlayerIdleState::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)
 {
-	if (PlayerPawn->MoveAxisInput == FVector2D::ZeroVector)
+	if (PlayerPawn->StateFlags.bMovementAllowed && PlayerPawn->MoveAxisInput != FVector2D::ZeroVector)
 	{
-		//OwnerStateMachine->
-	}
+		OwnerStateMachine->Request(UPlayerRunState::StaticClass());
+	} 
 }

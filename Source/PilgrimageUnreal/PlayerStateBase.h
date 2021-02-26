@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PilgrimageUnreal/StateBase.h"
+#include "StateBase.h"
+#include "PlayerPawn.h"
+#include "PlayerStateMachine.h"
 #include "PlayerStateBase.generated.h"
 
 class UPlayerStateMachine;
-class APlayerPawn;
 
 UCLASS()
 class PILGRIMAGEUNREAL_API UPlayerStateBase : public UStateBase
