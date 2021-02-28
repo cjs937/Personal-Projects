@@ -15,4 +15,6 @@ class PILGRIMAGEUNREAL_API UPlayerFallState : public UPlayerStateBase
 	GENERATED_BODY()
 
 	void Enter() override;
+
+	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
 };

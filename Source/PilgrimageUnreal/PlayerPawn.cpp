@@ -13,6 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "WorldCollision.h"
 #include "PlayerStates.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -70,7 +71,7 @@ void APlayerPawn::Tick(float DeltaTime)
 
 	if (StateFlags.bMovementAllowed && MoveAxisInput != FVector2D::ZeroVector)
 	{
-		ApplyLocomotion(IsGrounded().bBlockingHit ? MoveSpeed : MidJumpMoveSpeed);
+		ApplyLocomotion(IsGrounded() ? MoveSpeed : MidJumpMoveSpeed);
 	}
 }
 
@@ -83,10 +84,8 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	if (IsValid(World))
 		EnableInput(GetWorld()->GetFirstPlayerController());
 
-	//AutoPossessPlayer = EAutoReceiveInput::Player0;
-	//
-	InputComponent->BindAxis("L_Horizontal");/*, this, &APlayerPawn::Move_Y);*/
-	InputComponent->BindAxis("L_Vertical");  /*, this, &APlayerPawn::Move_X);*/
+	InputComponent->BindAxis("L_Horizontal");
+	InputComponent->BindAxis("L_Vertical");  
 	InputComponent->BindAxis("R_Horizontal");
 	InputComponent->BindAxis("R_Vertical");
 
@@ -139,6 +138,7 @@ void APlayerPawn::ResetMovementFlags()
 {
 	StateFlags.bMovementAllowed = true;
 	StateFlags.bCameraMovementAllowed = true;
+	NumJumps = 0;
 }
 
 bool APlayerPawn::IsGrounded()
@@ -150,7 +150,6 @@ bool APlayerPawn::IsGrounded()
 
 bool APlayerPawn::IsGrounded(FHitResult& OutHitResult)
 {
-	FHitResult HitResult;
 	UWorld* World = GetWorld();
 
 	if (!IsValid(World))
@@ -159,9 +158,16 @@ bool APlayerPawn::IsGrounded(FHitResult& OutHitResult)
 	FVector TraceStart = CapsuleComponent->GetComponentLocation();
 	FVector TraceEnd = TraceStart + (GetActorUpVector() * -1.0f) * GroundCheckRayDistance;
 
-	World->LineTraceSingleByProfile(HitResult, TraceStart, TraceEnd, "BlockAll");
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
 
-	return HitResult.bBlockingHit;	
+	//ActorLineTraceSingle(OutHitResult, TraceStart, TraceEnd, ECC_WorldStatic, FCollisionQueryParams::DefaultQueryParam);
+	
+	//DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, true);
+
+	World->LineTraceSingleByProfile(OutHitResult, TraceStart, TraceEnd, "BlockAll", Params);
+
+	return OutHitResult.bBlockingHit;
 }
 
 void APlayerPawn::UpdateJump()
@@ -195,7 +201,7 @@ void APlayerPawn::OnJumpReleased()
 	bJumpInputHeld = false;
 }	
 
-bool APlayerPawn::SetLocoomtionState(ELocomotionState NewState)
+bool APlayerPawn::SetLocomotionState(ELocomotionState NewState)
 {
 	StateFlags.LocomotionState = NewState;
 

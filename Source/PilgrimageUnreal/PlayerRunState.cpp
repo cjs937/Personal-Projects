@@ -8,8 +8,8 @@ void UPlayerRunState::Enter()
 {
 	UStateBase::Enter();
 
-	PlayerPawn->ResetMovementPermissions();
-	PlayerPawn->StateFlags.LocomotionState = Run;
+	PlayerPawn->ResetMovementFlags();
+	PlayerPawn->SetLocomotionState(Run);
 }
 
 void UPlayerRunState::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)

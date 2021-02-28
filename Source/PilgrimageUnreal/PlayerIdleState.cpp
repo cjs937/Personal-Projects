@@ -9,10 +9,8 @@ void UPlayerIdleState::Enter()
 {
 	UStateBase::Enter();
 
-	PlayerPawn->SetMovementAllowed(true);
-	PlayerPawn->SetCameraMovementAllowed(true);
-
-	PlayerPawn->StateFlags.LocomotionState = ELocomotionState::Idle;
+	PlayerPawn->ResetMovementFlags();
+	PlayerPawn->SetLocomotionState(Idle);
 }
 
 void UPlayerIdleState::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)

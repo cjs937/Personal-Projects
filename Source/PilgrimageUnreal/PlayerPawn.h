@@ -14,8 +14,8 @@ class UAnimationStateData;
 class UPlayerStateMachine;
 
 #pragma region State Flags
-UENUM()
-enum ELocomotionState //: uint16
+UENUM(BlueprintType)
+enum ELocomotionState
 {
 	Idle = 0,
 	Run,
@@ -35,7 +35,7 @@ public:
 		TEnumAsByte<ELocomotionState> LocomotionState = Idle;
 
 	UPROPERTY(BlueprintReadWrite)
-		bool bMovementAllowed = true;
+	bool bMovementAllowed = true;
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bCameraMovementAllowed = true;
@@ -147,11 +147,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResetMovementFlags();
 
-	UFUNCTION(BlueprintCallable)
+	//UFUNCTION(BlueprintCallable)
 	bool IsGrounded();
 
 	UFUNCTION(BlueprintCallable)
 	bool IsGrounded(FHitResult& OutHitResult);
+
+	UFUNCTION(BlueprintCallable)
+	bool SetLocomotionState(ELocomotionState NewState);
+
+	UFUNCTION(BlueprintCallable)
+	ELocomotionState GetLocomotionState() { return StateFlags.LocomotionState; };
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -167,8 +174,5 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateJump();
-
-	UFUNCTION(BlueprintCallable)
-	bool SetLocoomtionState(ELocomotionState NewState);
 #pragma endregion
 };

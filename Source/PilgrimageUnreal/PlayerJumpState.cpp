@@ -8,7 +8,9 @@
 
 void UPlayerJumpState::Enter()
 {
-	PlayerPawn->StateFlags.LocomotionState = Jump_Rise;
+	UStateBase::Enter();
+
+	PlayerPawn->SetLocomotionState(Jump_Rise);
 	FVector CancelledVelocity = PlayerPawn->CapsuleComponent->GetPhysicsLinearVelocity();
 	CancelledVelocity.Z = 0.0f;
 	PlayerPawn->CapsuleComponent->SetPhysicsLinearVelocity(CancelledVelocity);
@@ -25,15 +27,15 @@ void UPlayerJumpState::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 	//If the minimum jump time has passed
 	if (GetWorld()->GetTimeSeconds() - JumpStartTime > PlayerPawn->JumpStartupTime)
 	{
-		//If player is grounded or has let go of jump
-		if (PlayerPawn->IsGrounded() || !PlayerPawn->bJumpInputHeld)
+		//If player is grounded
+		if (PlayerPawn->IsGrounded())
 		{
 			OwnerStateMachine->Request(UPlayerIdleState::StaticClass());
 		}
-	}
-	//If the jump has passed the max jump startup length
-	else if(GetWorld()->GetTimeSeconds() - JumpStartTime > PlayerPawn->MaxJumpHoldTime)
-	{
-		OwnerStateMachine->Request(UPlayerFallState::StaticClass());
+		//If player has let go of jump or the jump has passed the max jump startup length
+		else if (!PlayerPawn->bJumpInputHeld || GetWorld()->GetTimeSeconds() - JumpStartTime > PlayerPawn->MaxJumpHoldTime)
+		{
+			OwnerStateMachine->Request(UPlayerFallState::StaticClass());
+		}
 	}
 }
