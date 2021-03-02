@@ -10,6 +10,7 @@ void UPlayerIdleState::Enter()
 	UStateBase::Enter();
 
 	PlayerPawn->ResetMovementFlags();
+	PlayerPawn->ResetJumpFlags();
 	PlayerPawn->SetLocomotionState(Idle);
 }
 

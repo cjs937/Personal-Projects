@@ -22,7 +22,7 @@ enum ELocomotionState
 	Jump_Rise,
 	Jump_Fall,
 	Land,
-	Wall_Cling
+	Wall_Hang
 };
 
 USTRUCT(BlueprintType)
@@ -73,6 +73,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UPlayerStateMachine* PlayerStateMachine;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USceneComponent* LedgeGrabPosition;
 #pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -92,6 +94,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GroundCheckRayDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ledge Grab")
+	float LedgeCheckAngle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ledge Grab")
+	float LedgeCheckDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ledge Grab")
+	float LedgeCheckHeightOffset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ledge Grab")
+	FVector LedgeCheckBoxSize;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
 	float JumpForce;
@@ -126,6 +140,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	bool bJumpInputHeld;
 
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	//FName LedgeCheckBoneName;
+
 #pragma region Functions
 public:
 
@@ -134,6 +151,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	UFUNCTION()
+	void OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(BlueprintCallable)
 	void ApplyLocomotion(float SpeedScalar);
@@ -147,11 +167,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResetMovementFlags();
 
-	//UFUNCTION(BlueprintCallable)
-	bool IsGrounded();
+	UFUNCTION(BlueprintCallable)
+	void ResetJumpFlags();
+
+	UFUNCTION(BlueprintCallable)
+	bool CheckForLedge(UPrimitiveComponent* HitComponent, FHitResult& OutTraceResult);
+
+	UFUNCTION(BlueprintCallable)
+	void GrabLedge(FHitResult LedgeTraceHit);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsGrounded(FHitResult& OutHitResult);
+	bool IsGrounded();
 
 	UFUNCTION(BlueprintCallable)
 	bool SetLocomotionState(ELocomotionState NewState);

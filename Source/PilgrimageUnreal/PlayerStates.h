@@ -3,3 +3,4 @@
 #include "PlayerRunState.h"
 #include "PlayerJumpState.h"
 #include "PlayerFallState.h"
+#include "PlayerWallHangState.h"

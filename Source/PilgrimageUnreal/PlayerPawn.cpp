@@ -14,6 +14,7 @@
 #include "WorldCollision.h"
 #include "PlayerStates.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -34,6 +35,9 @@ APlayerPawn::APlayerPawn()
 
 	CameraMask = CreateDefaultSubobject<USceneComponent>("CameraMask");
 	CameraMask->SetupAttachment(CameraRig);	
+	
+	LedgeGrabPosition = CreateDefaultSubobject<USceneComponent>("LedgeGrabPosition");
+	LedgeGrabPosition->SetupAttachment(SkeletalMesh);
 
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	Camera->SetupAttachment(GetRootComponent());
@@ -46,6 +50,8 @@ APlayerPawn::APlayerPawn()
 void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CapsuleComponent->OnComponentHit.AddDynamic(this, &APlayerPawn::OnComponentHit);
 }
 
 // Called every frame
@@ -138,6 +144,11 @@ void APlayerPawn::ResetMovementFlags()
 {
 	StateFlags.bMovementAllowed = true;
 	StateFlags.bCameraMovementAllowed = true;
+	CapsuleComponent->SetSimulatePhysics(true);
+}
+
+void APlayerPawn::ResetJumpFlags()
+{
 	NumJumps = 0;
 }
 
@@ -206,4 +217,64 @@ bool APlayerPawn::SetLocomotionState(ELocomotionState NewState)
 	StateFlags.LocomotionState = NewState;
 
 	return true;
+}
+
+bool APlayerPawn::CheckForLedge(UPrimitiveComponent* HitComponent, FHitResult& OutTraceResult)
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+		return false;
+
+	FVector PlayerGrabPos = LedgeGrabPosition->GetComponentLocation();//SkeletalMesh->GetBoneLocation(LedgeCheckBoneName);
+	FVector WallPos = HitComponent->GetComponentLocation();
+
+	float AngleToWall = FVector::DotProduct((WallPos - PlayerGrabPos).GetSafeNormal2D(), SkeletalMesh->GetForwardVector());
+	AngleToWall = FMath::Acos(AngleToWall);
+
+	if (AngleToWall > LedgeCheckAngle)
+		return false;
+
+	float WallHeight = HitComponent->Bounds.BoxExtent.Z * 2;
+	FVector TraceStart = PlayerGrabPos;
+	TraceStart.Z = WallHeight;
+	TraceStart += FVector::OneVector * LedgeCheckHeightOffset;
+
+	ETraceTypeQuery CollisionChannel = UEngineTypes::ConvertToTraceType(ECC_WorldStatic);
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	//UEngineTypes::ConvertToCollisionChannel(ECC_);
+
+	//FCollisionShape Box = FCollisionShape::MakeBox(LedgeCheckBoxSize);
+	//FCollisionQueryParams Params;
+	//World->SweepSingleByChannel(OutTraceResult, TraceStart, PlayerHandPos, FQuat::Identity, ECC_WorldStatic, Box);
+	UKismetSystemLibrary::BoxTraceSingle(World, TraceStart, PlayerGrabPos, LedgeCheckBoxSize, FRotator::ZeroRotator, CollisionChannel, true,
+		ActorsToIgnore, EDrawDebugTrace::ForOneFrame, OutTraceResult, true);
+
+	if (OutTraceResult.bBlockingHit && OutTraceResult.Location.Z >= PlayerGrabPos.Z)
+	{
+		return FVector::Distance(OutTraceResult.Location, LedgeGrabPosition->GetComponentLocation()) < LedgeCheckDistance;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void APlayerPawn::GrabLedge(FHitResult LedgeTraceHit)
+{
+	PlayerStateMachine->Request(UPlayerWallHangState::StaticClass());
+
+
+
+	//UE_LOG(LogTemp, Log, TEXT("Grabbed %s"), *GetNameSafe(LedgeTraceHit.GetActor()));
+}
+
+void APlayerPawn::OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	FHitResult LedgeHit;
+
+	if (CheckForLedge(Hit.GetComponent(), LedgeHit) && StateFlags.LocomotionState == Jump_Fall)
+	{
+		GrabLedge(LedgeHit);
+	}
 }
