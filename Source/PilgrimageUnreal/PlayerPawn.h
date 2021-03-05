@@ -96,6 +96,9 @@ public:
 	float GroundCheckRayDistance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ledge Grab")
+	FVector LedgeGrabOffset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ledge Grab")
 	float LedgeCheckAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ledge Grab")

@@ -74,6 +74,10 @@ void APlayerPawn::Tick(float DeltaTime)
 	{
 		UpdateJump();
 	}
+	else if (StateFlags.LocomotionState != Wall_Hang && !IsGrounded()) //if player is not in the jump or fall state and leaves the ground
+	{
+		PlayerStateMachine->Request(UPlayerFallState::StaticClass());
+	}
 
 	if (StateFlags.bMovementAllowed && MoveAxisInput != FVector2D::ZeroVector)
 	{
@@ -234,23 +238,19 @@ bool APlayerPawn::CheckForLedge(UPrimitiveComponent* HitComponent, FHitResult& O
 	if (AngleToWall > LedgeCheckAngle)
 		return false;
 
-	float WallHeight = HitComponent->Bounds.BoxExtent.Z * 2;
+	float WallBoundsZ = HitComponent->GetComponentLocation().Z + HitComponent->Bounds.BoxExtent.Z; //* 2;
 	FVector TraceStart = PlayerGrabPos;
-	TraceStart.Z = WallHeight;
+	TraceStart.Z = WallBoundsZ;
 	TraceStart += FVector::OneVector * LedgeCheckHeightOffset;
 
 	ETraceTypeQuery CollisionChannel = UEngineTypes::ConvertToTraceType(ECC_WorldStatic);
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
-	//UEngineTypes::ConvertToCollisionChannel(ECC_);
 
-	//FCollisionShape Box = FCollisionShape::MakeBox(LedgeCheckBoxSize);
-	//FCollisionQueryParams Params;
-	//World->SweepSingleByChannel(OutTraceResult, TraceStart, PlayerHandPos, FQuat::Identity, ECC_WorldStatic, Box);
 	UKismetSystemLibrary::BoxTraceSingle(World, TraceStart, PlayerGrabPos, LedgeCheckBoxSize, FRotator::ZeroRotator, CollisionChannel, true,
-		ActorsToIgnore, EDrawDebugTrace::ForOneFrame, OutTraceResult, true);
+		ActorsToIgnore, EDrawDebugTrace::None, OutTraceResult, true);
 
-	if (OutTraceResult.bBlockingHit && OutTraceResult.Location.Z >= PlayerGrabPos.Z)
+	if (OutTraceResult.bBlockingHit) //&& OutTraceResult.Location.Z >= PlayerGrabPos.Z)
 	{
 		return FVector::Distance(OutTraceResult.Location, LedgeGrabPosition->GetComponentLocation()) < LedgeCheckDistance;
 	}
@@ -262,11 +262,32 @@ bool APlayerPawn::CheckForLedge(UPrimitiveComponent* HitComponent, FHitResult& O
 
 void APlayerPawn::GrabLedge(FHitResult LedgeTraceHit)
 {
-	PlayerStateMachine->Request(UPlayerWallHangState::StaticClass());
+	EStateMachineResult RequestResult = PlayerStateMachine->Request(UPlayerWallHangState::StaticClass());
+	UPlayerWallHangState* HangState = (UPlayerWallHangState*)PlayerStateMachine->GetCurrentState();
 
+	if (RequestResult == EStateMachineResult::SUCCESS && IsValid(HangState))
+	{
+		FVector GrabPos = LedgeTraceHit.Location + LedgeGrabOffset;
+		FVector MeshPos = SkeletalMesh->GetComponentLocation();
+		FRotator GrabRot = SkeletalMesh->GetComponentRotation();
+		FRotator OldRot = GrabRot;
+		GrabRot.Yaw = UKismetMathLibrary::FindLookAtRotation(MeshPos, LedgeTraceHit.GetActor()->GetActorLocation()).Yaw;
+		//GrabRot.Yaw = UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, (LedgeTraceHit.Location - SkeletalMesh->GetComponentLocation()).GetSafeNormal()).Yaw; // .Yaw;
+		//DrawDebugSphere(GetWorld(), LedgeTraceHit.GetActor()->GetActorLocation(), 10.0f, 15, FColor::Blue, true);
+		//DrawDebugSphere(GetWorld(), MeshPos, 10.0f, 15, FColor::Blue, true);
+		//DrawDebugLine(GetWorld(), LedgeTraceHit.GetActor()->GetActorLocation(), MeshPos, FColor::Red, true, -1.0f, (uint8)'\000', 7.0f);
+		//DrawDebugSphere(GetWorld(), LedgeTraceHit.Location, 20.0f, 15, FColor::Green, true);
 
+		SetActorLocation(GrabPos);
+		//SkeletalMesh->SetWorldRotation(GrabRot);
+		HangState->InitWallSnap(LedgeTraceHit);
 
+		//UE_LOG(LogTemp, Log, TEXT("Previous: %s, Current: %s"), *OldRot.ToString(), *GrabRot.ToString());
+		//SetActorLocationAndRotation(GrabPos, GrabRot);
+	}
 	//UE_LOG(LogTemp, Log, TEXT("Grabbed %s"), *GetNameSafe(LedgeTraceHit.GetActor()));
+
+	
 }
 
 void APlayerPawn::OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
