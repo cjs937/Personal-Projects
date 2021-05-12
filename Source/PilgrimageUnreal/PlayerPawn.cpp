@@ -83,6 +83,11 @@ void APlayerPawn::Tick(float DeltaTime)
 	{
 		ApplyLocomotion(IsGrounded() ? MoveSpeed : MidJumpMoveSpeed);
 	}
+
+	if (CurrentDashCooldown > 0.0f)
+	{
+		CurrentDashCooldown -= DeltaTime;
+	}
 }
 
 // Called to bind functionality to input
@@ -102,19 +107,25 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	InputComponent->BindAction("Jump", IE_Pressed, this, &APlayerPawn::OnJumpPressed);
 	InputComponent->BindAction("Jump", IE_Released, this, &APlayerPawn::OnJumpReleased);
+	InputComponent->BindAction("Dash", IE_Pressed, this, &APlayerPawn::OnDashPressed);
 }
 
-void APlayerPawn::ApplyLocomotion(float SpeedScalar)
+FVector APlayerPawn::GetMoveDirection()
 {
 	FVector2D MoveVec = MoveAxisInput.X * (FVector2D)GetActorRightVector() + MoveAxisInput.Y * (FVector2D)GetActorForwardVector();
 
 	MoveVec = MoveVec.X * (FVector2D)Camera->GetForwardVector() + MoveVec.Y * (FVector2D)Camera->GetRightVector();
 
-	AddMovementInput(FVector(MoveVec.X, MoveVec.Y, 0.0f), SpeedScalar);
+	return FVector(MoveVec.X, MoveVec.Y, 0.0f);
+}
+
+void APlayerPawn::ApplyLocomotion(float SpeedScalar)
+{
+	AddMovementInput(GetMoveDirection(), SpeedScalar);
 
 	//Set rotation to look in direction of movement
 	FRotator Rotation = SkeletalMesh->GetComponentRotation();
-	Rotation.Yaw = UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, FVector(MoveVec.X, MoveVec.Y, 0.0f).GetSafeNormal()).Yaw;
+	Rotation.Yaw = UKismetMathLibrary::FindLookAtRotation(FVector::ZeroVector, GetMoveDirection()).Yaw;
 
 	SkeletalMesh->SetWorldRotation(Rotation);
 }
@@ -210,6 +221,17 @@ void APlayerPawn::OnJumpPressed()
 
 	bJumpInputHeld = true;
 }
+
+void APlayerPawn::OnDashPressed()
+{
+	if (CurrentDashCooldown <= 0.0f && IsValid(DashStateClass))
+	{
+		PlayerStateMachine->Request(DashStateClass);
+	}
+
+	CurrentDashCooldown = DashCooldown;
+}
+
 
 void APlayerPawn::OnJumpReleased()
 {

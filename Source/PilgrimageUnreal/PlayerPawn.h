@@ -12,6 +12,7 @@ class UCameraComponent;
 class UFloatingPawnMovement;
 class UAnimationStateData;
 class UPlayerStateMachine;
+class UStateBase;
 
 #pragma region State Flags
 UENUM(BlueprintType)
@@ -22,7 +23,8 @@ enum ELocomotionState
 	Jump_Rise,
 	Jump_Fall,
 	Land,
-	Wall_Hang
+	Wall_Hang,
+	Dash
 };
 
 USTRUCT(BlueprintType)
@@ -125,6 +127,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
 	float MaxJumpHoldTime;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Dash")
+	TSubclassOf<UStateBase> DashStateClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+	float DashCooldown;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+	float LongDashCooldown;
+
+	UPROPERTY(BlueprintReadWrite)
+	float CurrentDashCooldown;
+
 	UPROPERTY(BlueprintReadWrite)
 	int NumJumps = 0;
 
@@ -189,6 +203,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ELocomotionState GetLocomotionState() { return StateFlags.LocomotionState; };
 
+	UFUNCTION(BlueprintCallable)
+	FVector GetMoveDirection();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -201,6 +218,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void OnJumpReleased();
+
+	UFUNCTION(BlueprintCallable)
+	void OnDashPressed();
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateJump();
