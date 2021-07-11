@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "AttackHitbox.generated.h"
+#include "Attack.generated.h"
 
 UCLASS()
-class PILGRIMAGEUNREAL_API AAttackHitbox : public AActor
+class PILGRIMAGEUNREAL_API AAttack : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AAttackHitbox();
+	AAttack();
 
 protected:
 	// Called when the game starts or when spawned

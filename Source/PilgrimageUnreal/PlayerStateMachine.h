@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "StateMachine.h"
+//#include "PlayerAttackState.h"
 #include "PlayerStateMachine.generated.h"
 
 class APlayerPawn;
+//class AAttack;
 
 UCLASS()
 class PILGRIMAGEUNREAL_API UPlayerStateMachine : public UStateMachine
@@ -16,6 +18,8 @@ class PILGRIMAGEUNREAL_API UPlayerStateMachine : public UStateMachine
 public:
 	APlayerPawn* PlayerPawn;
 
+	//UFUNCTION(BlueprintCallable)
+	//bool BeginAttackState(AAttack* AttackClass, TSubclassOf<UPlayerAttackState> StateClassOverride);
 protected:
 	virtual void Initialize() override;
 };

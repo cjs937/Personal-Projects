@@ -265,7 +265,7 @@ bool APlayerPawn::CheckForLedge(UPrimitiveComponent* HitComponent, FHitResult& O
 	TraceStart.Z = WallBoundsZ;
 	TraceStart += FVector::OneVector * LedgeCheckHeightOffset;
 
-	ETraceTypeQuery CollisionChannel = UEngineTypes::ConvertToTraceType(ECC_WorldStatic);
+	ETraceTypeQuery CollisionChannel = UEngineTypes::ConvertToTraceType(ECC_PhysicsBody);
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
 

@@ -24,7 +24,8 @@ enum ELocomotionState
 	Jump_Fall,
 	Land,
 	Wall_Hang,
-	Dash
+	Dash,
+	Attacking
 };
 
 USTRUCT(BlueprintType)
