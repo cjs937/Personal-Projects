@@ -321,3 +321,8 @@ void APlayerPawn::OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActo
 		GrabLedge(LedgeHit);
 	}
 }
+
+float APlayerPawn::GetStickAngle(float XInput, float YInput)
+{
+	return 2 * FMath::Atan(YInput / (XInput + FMath::Sqrt((XInput * XInput) + (YInput * YInput))));
+}

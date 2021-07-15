@@ -207,6 +207,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FVector GetMoveDirection();
 
+	UFUNCTION(BlueprintCallable)
+	float GetStickAngle(float XINput, float YInput);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
