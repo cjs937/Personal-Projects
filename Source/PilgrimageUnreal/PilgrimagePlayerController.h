@@ -6,12 +6,14 @@
 #include "GameFramework/PlayerController.h"
 #include "PilgrimagePlayerController.generated.h"
 
-/**
- * 
- */
+class UInputBuffer;
+
 UCLASS()
 class PILGRIMAGEUNREAL_API APilgrimagePlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+	APilgrimagePlayerController();
+
+	UPROPERTY(EditDefaultsOnly)
+	UInputBuffer* InputBuffer;
 };

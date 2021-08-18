@@ -2,4 +2,11 @@
 
 
 #include "PilgrimagePlayerController.h"
+#include "InputBuffer.h"
+
+APilgrimagePlayerController::APilgrimagePlayerController()
+{
+	PrimaryActorTick.bCanEverTick = true;
+	InputBuffer = CreateDefaultSubobject<UInputBuffer>("InputBuffer");
+}
 
